@@ -57,6 +57,20 @@ The CLI streams the investigation timeline, renders the proposed mutations as a 
 
 Run it twice: the second run's `recall` phase finds the postmortem the first run wrote and starts from its conclusions.
 
+### Web UI
+
+```bash
+# terminal 1
+cd backend && .venv/bin/hindsight serve         # FastAPI on :8000
+
+# terminal 2
+cd frontend && npm install && npm run dev       # Vite on http://localhost:5173
+```
+
+Single-page React app: submit an incident and watch the evidence timeline stream live over SSE while the panels fill in as each phase completes — resolved asset, "we've seen this before" (memory), blast radius ranked by impact score, root-cause hypotheses with confidence bars, and the proposed action plan rendered as a diff with **Approve / Reject** buttons (the human gate). After approval, each mutation shows its commit result and the postmortem reference.
+
+If the API runs elsewhere, set `VITE_API_URL` in `frontend/.env` (defaults to `http://localhost:8000`).
+
 ### API server
 
 ```bash
@@ -99,7 +113,14 @@ backend/src/hindsight/
 ├── safety/                 # dry-run rendering + JSONL audit log
 ├── api/                    # FastAPI + SSE
 └── cli.py                  # `hindsight investigate` / `hindsight serve`
+
+frontend/src/
+├── useInvestigation.ts     # all state + SSE lifecycle in one hook
+├── App.tsx                 # layout: live timeline | progressive result panels
+└── components/             # Timeline, RecallPanel, BlastRadius, HypothesesPanel, PlanPanel
 ```
+
+The frontend is deliberately dependency-free beyond React: native `EventSource` for streaming, plain CSS for the theme, no router or state library.
 
 ## Tests
 

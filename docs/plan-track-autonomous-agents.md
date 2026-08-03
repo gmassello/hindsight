@@ -5,6 +5,8 @@
 > Documento técnico de ejecución · German Massello · 2 de agosto de 2026
 > **Cierre: lunes 10 de agosto, 18:00 ART** (5:00pm EDT) · 8 días
 
+> **Estado al 2 de agosto (fin del día)**: backend completo (8 fases, CLI, FastAPI+SSE, tests) y frontend completo (React+Vite+TS, timeline SSE, blast radius, panel de memoria, gate de aprobación) — días 1 a 7 del cronograma adelantados. Verificado end-to-end contra DataHub local: corrida fría con approve (5 mutaciones + postmortem guardado), corrida caliente que recuperó el postmortem de la anterior, y camino de reject. Nota: el frontend se construyó de cero porque el proyecto Recall no estaba disponible para reciclar. Falta: `scenarios/`, `examples/`, docker-compose, video, skill open source, submission.
+
 ---
 
 ## 1. Qué premia exactamente este track

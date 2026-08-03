@@ -29,6 +29,15 @@ datahub datapack load showcase-ecommerce
 
 `backend/.env` needs `GEMINI_API_KEY` (default provider). `DATAHUB_GMS_TOKEN` stays empty for quickstart (metadata-service auth is disabled there).
 
+Frontend (from `frontend/`, React + Vite + TS):
+
+```bash
+npm install
+npm run dev                              # Vite dev server on :5173 (CORS default already allows it)
+npm run build                            # tsc + vite build — the frontend gate before finishing any task
+npm run lint                             # oxlint
+```
+
 ## Architecture
 
 The core design decision: **a deterministic phase state machine with an LLM inside each phase**, not a free ReAct loop. `agent/orchestrator.py` defines two phase lists split by the human gate — `investigate()` runs intake → resolve → recall → impact → root_cause → propose, then stops with status `awaiting_approval`; `commit_and_learn()` runs commit → learn after approval. Each phase entry carries a `critical` flag: critical phases abort the run on failure, non-critical ones emit an error event and continue with partial state.
@@ -40,6 +49,8 @@ Four phases (resolve, recall, impact, root_cause) are mini tool-using agents bui
 DataHub access (`datahub/mcp_client.py`) has two transports: streamable HTTP when `DATAHUB_MCP_URL` is set (DataHub Cloud), otherwise it spawns `uvx mcp-server-datahub` over stdio with `TOOLS_IS_MUTATION_ENABLED=true`. Tool schemas are discovered at runtime — never hardcode arg shapes; `propose` injects the live mutation schemas into its prompt, and `learn` reads the `document_type` enum from the live `save_document` schema. Read/write tool split uses MCP `readOnlyHint` annotations with a name-prefix fallback. Mutations that fail over MCP retry through `datahub/graphql_fallback.py` (GMS GraphQL, also creates tags via `ensure_tag`).
 
 The memory loop is the differentiator: `learn` saves the postmortem as a DataHub document; the next run's `recall` phase retrieves it via `search_documents`/`grep_documents` and turns it into `investigation_hints` that steer `root_cause`. Note the MCP server **hides the document tools when the catalog has zero documents** — recall treats their absence as cold start, not an error.
+
+The frontend (`frontend/src/`) is a single-page React app with zero runtime deps beyond react/react-dom: one custom hook `useInvestigation.ts` owns all state and the SSE lifecycle, `App.tsx` renders panels progressively as each phase's `result` event arrives. SSE contract quirks it depends on: the SSE event *name* is the TimelineEvent `kind` (not the phase), so every kind plus `state`/`agent_error` needs its own `addEventListener`; the stream is one-shot (409 on reopen), so the EventSource must be closed on the terminal `state`/`agent_error` frames to prevent the browser's auto-reconnect, and it is opened inside the `start()` handler (not an effect) so StrictMode's double mount can't hit the 409; `/approve` is a blocking 30–60s call, rendered as a "committing" state whose returned events are appended to the timeline afterwards.
 
 ## Gotchas learned the hard way
 
@@ -53,3 +64,4 @@ The memory loop is the differentiator: `learn` saves the postmortem as a DataHub
 - Code, docs, prompts and user-facing strings in English; conversation with the user in Spanish.
 - The repo owner's global rules apply: no code comments, no JavaDocs-style docs, surgical diffs.
 - Scope discipline: out of scope by design are warehouse SQL execution, PagerDuty/Slack/Jira integrations, multi-user auth, and incident detection/monitoring (see plan §3).
+- Frontend: no new runtime dependencies (native `EventSource`/`fetch`, plain CSS, no router/state/chart libraries); no frontend test framework — `npm run build` is the gate.
