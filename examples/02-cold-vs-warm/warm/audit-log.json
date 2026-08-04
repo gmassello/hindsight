@@ -1,0 +1,71 @@
+[
+  {
+    "timestamp": "2026-08-03T22:55:16.798456+00:00",
+    "incident_id": "1b2d6a11",
+    "tool": "add_tags",
+    "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+    "args": {
+      "entity_urns": [
+        "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+        "urn:li:dataset:(urn:li:dataPlatform:postgres,b2fd91.order_entry_db.order_entry.orders,PROD)"
+      ],
+      "tag_urns": [
+        "urn:li:tag:hindsight-degraded"
+      ]
+    },
+    "rationale": "Marking the root cause datasets as degraded due to NULL values in customer_id.",
+    "via": "mcp",
+    "ok": true,
+    "error": null
+  },
+  {
+    "timestamp": "2026-08-03T22:55:17.282053+00:00",
+    "incident_id": "1b2d6a11",
+    "tool": "add_tags",
+    "urn": "urn:li:dashboard:(powerbi,b2fd91.reports.66666666-7777-8888-9999-000000000000)",
+    "args": {
+      "tag_urns": [
+        "urn:li:tag:hindsight-impacted"
+      ],
+      "entity_urns": [
+        "urn:li:dashboard:(powerbi,b2fd91.reports.66666666-7777-8888-9999-000000000000)",
+        "urn:li:dashboard:(looker,b2fd91.dashboards.53)",
+        "urn:li:dashboard:(tableau,b2fd91.843bf583-900b-f1ba-0532-b5e67a0373dc)"
+      ]
+    },
+    "rationale": "Tagging downstream high-impact dashboards as impacted by the NULL value propagation.",
+    "via": "mcp",
+    "ok": true,
+    "error": null
+  },
+  {
+    "timestamp": "2026-08-03T22:55:17.788712+00:00",
+    "incident_id": "1b2d6a11",
+    "tool": "update_description",
+    "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+    "args": {
+      "operation": "append",
+      "description": "[INCIDENT 03:00 UTC] This asset contains NULL values in the customer_id column due to upstream data quality issues. Currently under investigation/remediation.",
+      "entity_urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)"
+    },
+    "rationale": "Adding a warning description to the primary degraded dataset.",
+    "via": "mcp",
+    "ok": true,
+    "error": null
+  },
+  {
+    "timestamp": "2026-08-03T22:55:19.402011+00:00",
+    "incident_id": "1b2d6a11",
+    "tool": "update_description",
+    "urn": "urn:li:dataset:(urn:li:dataPlatform:postgres,b2fd91.order_entry_db.order_entry.orders,PROD)",
+    "args": {
+      "operation": "append",
+      "entity_urn": "urn:li:dataset:(urn:li:dataPlatform:postgres,b2fd91.order_entry_db.order_entry.orders,PROD)",
+      "description": "[INCIDENT 03:00 UTC] Upstream data quality issues are causing NULLs to propagate into this table. Consumers may see incomplete order data."
+    },
+    "rationale": "Adding a warning description to the upstream source dataset.",
+    "via": "mcp",
+    "ok": true,
+    "error": null
+  }
+]

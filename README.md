@@ -26,6 +26,8 @@ A later run even benefits from the write-back directly: an ancestor already tagg
                                          (code)                    (code)
 ```
 
+### Design decisions
+
 - **Deterministic phase pipeline, not a free ReAct loop.** The orchestrator decides *which* phase runs and *which* DataHub tools are available in it; the LLM decides *how* to interpret the results. Each phase emits timeline events (SSE-ready), can be tested in isolation, and degrades gracefully: non-critical phases fail into "continue with partial information" instead of killing the run.
 - **Per-phase toolsets.** Investigation phases (1–4) only ever see read tools; mutation tools exist only in `commit`/`learn`. The model cannot write while it should be reading.
 - **Memory before investigation.** `recall` runs *before* `impact`/`root_cause`, and what it retrieves becomes `investigation_hints` that direct where the root-cause search looks first. Memory steers the investigation instead of decorating it.
@@ -67,6 +69,16 @@ cd backend && .venv/bin/hindsight serve         # FastAPI on :8000
 cd frontend && npm install && npm run dev       # Vite on http://localhost:5173
 ```
 
+### One-command bring-up (Docker)
+
+With DataHub quickstart already running (step 1 above):
+
+```bash
+GEMINI_API_KEY=<your-key> docker compose up --build
+```
+
+Backend on `http://localhost:8000`, frontend on `http://localhost:5173`. The backend container reaches the host's DataHub through `host.docker.internal:8080`, so no compose changes are needed on macOS or Linux.
+
 Single-page React app: submit an incident and watch the evidence timeline stream live over SSE while the panels fill in as each phase completes — resolved asset, "we've seen this before" (memory), blast radius ranked by impact score, root-cause hypotheses with confidence bars, and the proposed action plan rendered as a diff with **Approve / Reject** buttons (the human gate). After approval, each mutation shows its commit result and the postmortem reference.
 
 If the API runs elsewhere, set `VITE_API_URL` in `frontend/.env` (defaults to `http://localhost:8000`).
@@ -96,6 +108,16 @@ If the API runs elsewhere, set `VITE_API_URL` in `frontend/.env` (defaults to `h
 | `PHASE_MAX_TURNS` | `12` | LLM turn budget per phase |
 | `AUDIT_LOG_PATH` | `var/audit-log.jsonl` | Mutation audit log |
 
+## Demo scenarios
+
+`scenarios/scenarios.yaml` defines three reproducible scenarios; `examples/` holds the real artifacts (input, timeline, blast radius, postmortem, audit log) captured with `hindsight investigate ... --report <dir>`:
+
+1. [`01-schema-drift`](examples/01-schema-drift/) — a simulated upstream migration (`scenarios/break_schema.py`) drops the `customer_id` NOT NULL constraint; the agent finds the migration note on the source, tags the degraded and impacted assets, and saves the postmortem.
+2. [`02-cold-vs-warm`](examples/02-cold-vs-warm/) ★ — the same incident twice. The cold run investigates from scratch (**29 DataHub tool calls**); the warm run's `recall` phase retrieves the postmortem the cold run just wrote and goes straight to the suspect ancestor (**17 calls, 41% fewer**). The two timelines sit side by side.
+3. [`03-orphaned-asset`](examples/03-orphaned-asset/) — a stale table nobody owns: besides the incident actions, the agent proposes `add_owners` to close the governance gap.
+
+`scenarios/seed_incidents.py` loads six resolved historical postmortems into DataHub documents so `recall` has memory to work with.
+
 ## Project layout
 
 ```
@@ -118,6 +140,10 @@ frontend/src/
 ├── useInvestigation.ts     # all state + SSE lifecycle in one hook
 ├── App.tsx                 # layout: live timeline | progressive result panels
 └── components/             # Timeline, RecallPanel, BlastRadius, HypothesesPanel, PlanPanel
+
+scenarios/                  # seed_incidents.py, break_schema.py, scenarios.yaml
+examples/                   # real captured runs for the three demo scenarios
+docker-compose.yml          # backend + frontend against an external DataHub quickstart
 ```
 
 The frontend is deliberately dependency-free beyond React: native `EventSource` for streaming, plain CSS for the theme, no router or state library.

@@ -1,4 +1,6 @@
 import asyncio
+import json
+from pathlib import Path
 
 import typer
 import uvicorn
@@ -11,11 +13,17 @@ from hindsight.agent.orchestrator import commit_and_learn
 from hindsight.agent.orchestrator import investigate as run_investigation
 from hindsight.config import settings
 from hindsight.datahub.mcp_client import DataHubMCP
+from hindsight.memory.postmortem import blast_table, postmortem_title, render_markdown
 from hindsight.models import InvestigationState, TimelineEvent
+from hindsight.safety.audit_log import records_for
 from hindsight.safety.dry_run import render_plan
 
 app = typer.Typer(add_completion=False)
 console = Console()
+
+REPORT_OPTION = typer.Option(
+    None, "--report", help="Write investigation artifacts to this directory"
+)
 
 STYLES = {
     "start": ("bold cyan", "▶"),
@@ -34,11 +42,43 @@ def _print_event(event: TimelineEvent) -> None:
     console.print(f"{indent}{icon} {label}{event.message}", style=style, highlight=False)
 
 
-async def _run(text: str, auto_approve: bool) -> int:
-    state = InvestigationState.new(text)
+def _write_report(state: InvestigationState, events: list[TimelineEvent], path: Path) -> None:
+    path.mkdir(parents=True, exist_ok=True)
+    (path / "input.txt").write_text(state.input_text + "\n")
+
+    timeline: list[str] = [f"# Investigation {state.id}"]
+    for event in events:
+        if event.kind == "start":
+            timeline.append("")
+            timeline.append(f"## {event.phase} — {event.message}")
+        else:
+            timeline.append(f"- {event.kind}: {event.message}")
+    timeline.append("")
+    timeline.append(f"Status: {state.status} · DataHub tool calls: {state.tool_calls}")
+    (path / "timeline.md").write_text("\n".join(timeline) + "\n")
+
+    blast = ["# Blast radius", ""]
+    if state.blast_radius and state.blast_radius.impacted:
+        radius = state.blast_radius
+        blast.append(f"Total score: {radius.total_score}")
+        blast.append(f"Owners to notify: {', '.join(radius.owners_to_notify) or 'none'}")
+        blast.append("")
+        blast.extend(blast_table(radius, owners=True))
+    else:
+        blast.append("No blast radius computed.")
+    (path / "blast-radius.md").write_text("\n".join(blast) + "\n")
+
+    title = postmortem_title(state)
+    (path / "postmortem.md").write_text(render_markdown(state, title) + "\n")
+
+    (path / "audit-log.json").write_text(json.dumps(records_for(state.id), indent=2) + "\n")
+
+
+async def _run(state: InvestigationState, events: list[TimelineEvent], auto_approve: bool) -> int:
     async with DataHubMCP() as datahub:
         ctx = Ctx(state=state, datahub=datahub)
         async for event in run_investigation(ctx):
+            events.append(event)
             _print_event(event)
         if state.status == "failed":
             console.print("\nInvestigation failed.", style="bold red")
@@ -56,6 +96,7 @@ async def _run(text: str, auto_approve: bool) -> int:
 
         console.print()
         async for event in commit_and_learn(ctx):
+            events.append(event)
             _print_event(event)
 
     console.print()
@@ -72,8 +113,17 @@ def investigate(
     auto_approve: bool = typer.Option(
         False, "--auto-approve", help="Skip the human gate and apply the plan directly"
     ),
+    report: Path | None = REPORT_OPTION,
 ) -> None:
-    raise typer.Exit(asyncio.run(_run(text, auto_approve)))
+    state = InvestigationState.new(text)
+    events: list[TimelineEvent] = []
+    try:
+        code = asyncio.run(_run(state, events, auto_approve))
+    finally:
+        if report:
+            _write_report(state, events, report)
+            console.print(f"\nReport written to {report}", style="dim")
+    raise typer.Exit(code)
 
 
 @app.command()

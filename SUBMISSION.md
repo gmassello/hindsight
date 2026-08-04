@@ -28,12 +28,12 @@ The track rewards agents that **read** DataHub, **act**, and **write back**. All
 
 ### Pending
 
-- [ ] `scenarios/` — `seed_incidents.py` (6–8 plausible historical postmortems), `break_schema.py` (deterministic breakage), `scenarios.yaml`
-- [ ] `examples/` — **explicitly requested by the judges**
-  - [ ] `01-schema-drift/` — input.txt, timeline.md, blast-radius.md, postmortem.md, audit-log.json
-  - [ ] `02-cold-vs-warm/` ★ — same incident with and without memory, both traces side by side
-  - [ ] `03-orphaned-asset/` — governance gap (add_owners + set_domains)
-- [ ] `docker-compose.yml` — one-command bring-up (plan B for hosted demo: `docker-compose up` + GIF in README)
+- [x] `scenarios/` — `seed_incidents.py` (6 historical postmortems), `break_schema.py` (verified live: break + reset), `scenarios.yaml`
+- [x] `examples/` — **explicitly requested by the judges** (captured with `hindsight investigate ... --report <dir>`)
+  - [x] `01-schema-drift/` — real run, 16 tool calls; cites the planted upstream migration evidence
+  - [x] `02-cold-vs-warm/` ★ — cold 29 vs. warm 17 tool calls (41% fewer); warm recall retrieves the cold run's postmortem and steers root_cause to the Postgres source
+  - [x] `03-orphaned-asset/` — real run, 12 tool calls. Caveat: captured with `gemini-3.1-flash-lite` (free-tier fallback), which never proposes `add_owners`; re-run with the full model when quota resets. The cold run of scenario 2 already demonstrates `add_owners` on an unowned dashboard organically.
+- [x] `docker-compose.yml` — backend + frontend against external DataHub quickstart; smoke-tested
 - [ ] Clean-clone test: repo cloned into a fresh directory works following only the README
 - [ ] README final pass: architecture diagram, quickstart, "Design decisions" section (deterministic phase pipeline, per-phase toolset, dry-run, human gate default, SDK fallback)
 - [ ] Video: 3 minutes, **public**, script written before recording with a timer per section

@@ -1,0 +1,1 @@
+order_history in the analytics schema is stale since yesterday; the catalog shows no owner for it, the data platform group (b2fd91.ORG_DATA_PLATFORM) should probably be assigned as owner

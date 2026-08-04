@@ -1,0 +1,55 @@
+[
+  {
+    "timestamp": "2026-08-03T22:58:08.204169+00:00",
+    "incident_id": "73759c58",
+    "tool": "add_tags",
+    "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+    "args": {
+      "entity_urns": [
+        "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)"
+      ],
+      "tag_urns": [
+        "urn:li:tag:hindsight-degraded"
+      ]
+    },
+    "rationale": "Mark the primary Snowflake orders dataset as degraded due to null value propagation.",
+    "via": "mcp",
+    "ok": true,
+    "error": null
+  },
+  {
+    "timestamp": "2026-08-03T22:58:08.710509+00:00",
+    "incident_id": "73759c58",
+    "tool": "update_description",
+    "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+    "args": {
+      "entity_urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+      "description": "**[INCIDENT 03:00 UTC]** The 'customer_id' column contains unexpected NULL values due to an upstream Postgres data quality issue. Data quality is currently degraded.",
+      "operation": "append"
+    },
+    "rationale": "Add a warning description to the Snowflake orders dataset to notify users of the ongoing null value incident.",
+    "via": "mcp",
+    "ok": true,
+    "error": null
+  },
+  {
+    "timestamp": "2026-08-03T22:58:09.160007+00:00",
+    "incident_id": "73759c58",
+    "tool": "add_tags",
+    "urn": "urn:li:dashboard:(looker,b2fd91.dashboards.53)",
+    "args": {
+      "tag_urns": [
+        "urn:li:tag:hindsight-impacted"
+      ],
+      "entity_urns": [
+        "urn:li:dashboard:(looker,b2fd91.dashboards.53)",
+        "urn:li:dashboard:(powerbi,b2fd91.reports.66666666-7777-8888-9999-000000000000)",
+        "urn:li:dashboard:(tableau,b2fd91.843bf583-900b-f1ba-0532-b5e67a0373dc)"
+      ]
+    },
+    "rationale": "Flag primary downstream dashboards as impacted by the data quality incident.",
+    "via": "mcp",
+    "ok": true,
+    "error": null
+  }
+]

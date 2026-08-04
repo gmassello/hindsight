@@ -16,3 +16,12 @@ def record(incident_id: str, entry: CommitRecord) -> None:
     }
     with path.open("a") as fh:
         fh.write(json.dumps(line, ensure_ascii=False, default=str) + "\n")
+
+
+def records_for(incident_id: str) -> list[dict]:
+    path = Path(settings.audit_log_path)
+    if not path.exists():
+        return []
+    with path.open() as fh:
+        candidates = (json.loads(line) for line in fh if incident_id in line)
+        return [r for r in candidates if r.get("incident_id") == incident_id]

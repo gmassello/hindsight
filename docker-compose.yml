@@ -1,0 +1,20 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - path: ./backend/.env
+        required: false
+    environment:
+      - DATAHUB_GMS_URL=http://host.docker.internal:8080
+      - DATAHUB_MCP_COMMAND=mcp-server-datahub
+      - LLM_PROVIDER
+      - GEMINI_API_KEY
+      - ANTHROPIC_API_KEY
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:80"

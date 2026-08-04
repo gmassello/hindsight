@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 
-from hindsight.models import InvestigationState
+from hindsight.models import BlastRadius, InvestigationState
 
 
 def default_title(state: InvestigationState) -> str:
@@ -8,6 +8,39 @@ def default_title(state: InvestigationState) -> str:
     symptom = state.incident.symptom_type if state.incident else "incident"
     date = datetime.now(UTC).strftime("%Y-%m-%d")
     return f"Incident {date}: {symptom} in {asset}"
+
+
+def postmortem_title(state: InvestigationState) -> str:
+    return (state.plan.postmortem_title if state.plan else "") or default_title(state)
+
+
+def save_document_args(
+    schema: dict, title: str, content: str, related_urn: str | None = None
+) -> dict:
+    args: dict = {"title": title, "content": content}
+    properties = schema.get("properties", {})
+    if "related_assets" in properties and related_urn:
+        args["related_assets"] = [related_urn]
+    doc_type = properties.get("document_type", {})
+    allowed = doc_type.get("enum") or [
+        option["const"] for option in doc_type.get("anyOf", []) if option.get("const")
+    ]
+    if allowed:
+        args["document_type"] = "Analysis" if "Analysis" in allowed else allowed[0]
+    return args
+
+
+def blast_table(blast: BlastRadius, owners: bool = False) -> list[str]:
+    if owners:
+        lines = ["| Asset | Type | Hops | Score | Owners |", "|---|---|---|---|---|"]
+    else:
+        lines = ["| Asset | Type | Hops | Score |", "|---|---|---|---|"]
+    for a in blast.impacted:
+        row = f"| {a.name or a.urn} | {a.type} | {a.hops} | {a.score} |"
+        if owners:
+            row += f" {', '.join(a.owners) or '—'} |"
+        lines.append(row)
+    return lines
 
 
 def render_markdown(state: InvestigationState, title: str) -> str:
@@ -34,10 +67,7 @@ def render_markdown(state: InvestigationState, title: str) -> str:
         )
         lines.append(f"Owners notified: {', '.join(blast.owners_to_notify) or 'none'}")
         lines.append("")
-        lines.append("| Asset | Type | Hops | Score |")
-        lines.append("|---|---|---|---|")
-        for a in blast.impacted:
-            lines.append(f"| {a.name or a.urn} | {a.type} | {a.hops} | {a.score} |")
+        lines.extend(blast_table(blast))
         lines.append("")
 
     if state.hypotheses:

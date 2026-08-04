@@ -1,7 +1,7 @@
 from collections.abc import AsyncIterator
 
 from hindsight.agent.context import Ctx
-from hindsight.memory.postmortem import default_title, render_markdown
+from hindsight.memory.postmortem import postmortem_title, render_markdown, save_document_args
 from hindsight.models import TimelineEvent
 
 
@@ -15,19 +15,11 @@ async def run(ctx: Ctx) -> AsyncIterator[TimelineEvent]:
             "the postmortem could not be stored",
         )
         return
-    title = (state.plan.postmortem_title if state.plan else "") or default_title(state)
+    title = postmortem_title(state)
     content = render_markdown(state, title)
-    args: dict = {"title": title, "content": content}
     schema = ctx.datahub.tools["save_document"].input_schema
-    properties = schema.get("properties", {})
-    if "related_assets" in properties and state.resolution:
-        args["related_assets"] = [state.resolution.resolved_asset.urn]
-    doc_type = properties.get("document_type", {})
-    allowed = doc_type.get("enum") or [
-        option["const"] for option in doc_type.get("anyOf", []) if option.get("const")
-    ]
-    if allowed:
-        args["document_type"] = "Analysis" if "Analysis" in allowed else allowed[0]
+    related = state.resolution.resolved_asset.urn if state.resolution else None
+    args = save_document_args(schema, title, content, related)
     result = await ctx.datahub.call("save_document", args)
     ref = ""
     if isinstance(result, dict):

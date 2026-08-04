@@ -1,0 +1,51 @@
+scenarios:
+  - id: 01-schema-drift
+    name: Schema drift upstream
+    input: >-
+      orders in order_entry_db is showing NULL values in customer_id since
+      03:00 UTC today, downstream order reports look wrong
+    asset: urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)
+    prepare:
+      - backend/.venv/bin/python scenarios/break_schema.py
+    run: >-
+      cd backend && .venv/bin/hindsight investigate "<input>" --auto-approve
+      --report ../examples/01-schema-drift
+    reset:
+      - backend/.venv/bin/python scenarios/break_schema.py --reset
+
+  - id: 02-cold-vs-warm
+    name: Cold vs. warm memory (run before seeding, on a fresh catalog)
+    input: >-
+      orders in order_entry_db is showing NULL values in customer_id since
+      03:00 UTC today, downstream order reports look wrong
+    asset: urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)
+    runs:
+      - id: cold
+        note: empty memory, the agent investigates from scratch
+        run: >-
+          cd backend && .venv/bin/hindsight investigate "<input>" --auto-approve
+          --report ../examples/02-cold-vs-warm/cold
+      - id: warm
+        note: recall retrieves the postmortem the cold run just saved
+        run: >-
+          cd backend && .venv/bin/hindsight investigate "<input>" --auto-approve
+          --report ../examples/02-cold-vs-warm/warm
+
+  - id: 03-orphaned-asset
+    name: Governance gap
+    input: >-
+      order_history in the analytics schema is stale since yesterday; the
+      catalog shows no owner for it, the data platform group
+      (b2fd91.ORG_DATA_PLATFORM) should probably be assigned as owner
+    asset: urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)
+    run: >-
+      cd backend && .venv/bin/hindsight investigate "<input>" --auto-approve
+      --report ../examples/03-orphaned-asset
+
+seed:
+  description: loads 6 resolved historical postmortems into DataHub documents
+  run: backend/.venv/bin/python scenarios/seed_incidents.py
+
+full_reset:
+  description: only deterministic way to wipe agent memory (documents)
+  run: datahub docker nuke && datahub docker quickstart && datahub datapack load showcase-ecommerce

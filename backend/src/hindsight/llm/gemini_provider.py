@@ -75,7 +75,12 @@ class GeminiProvider:
     def __init__(self) -> None:
         if not settings.gemini_api_key:
             raise RuntimeError("GEMINI_API_KEY is required with LLM_PROVIDER=gemini")
-        self.client = genai.Client(api_key=settings.gemini_api_key)
+        self.client = genai.Client(
+            api_key=settings.gemini_api_key,
+            http_options=types.HttpOptions(
+                retry_options=types.HttpRetryOptions(attempts=6, initial_delay=10, max_delay=60)
+            ),
+        )
         self.model = settings.gemini_model
 
     def converse(

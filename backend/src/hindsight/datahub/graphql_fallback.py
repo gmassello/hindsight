@@ -29,6 +29,18 @@ def _execute(query: str, variables: dict[str, Any]) -> Any:
     return body.get("data")
 
 
+def dataset_description(urn: str) -> str:
+    data = _execute(
+        "query($urn: String!) { dataset(urn: $urn) {"
+        " editableProperties { description } properties { description } } }",
+        {"urn": urn},
+    )
+    dataset = data.get("dataset") or {}
+    editable = (dataset.get("editableProperties") or {}).get("description")
+    original = (dataset.get("properties") or {}).get("description")
+    return editable or original or ""
+
+
 def _tag_urn(tag: str) -> str:
     return tag if tag.startswith("urn:li:tag:") else f"urn:li:tag:{tag}"
 
