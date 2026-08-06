@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Hindsight is a hackathon project (DataHub Agent Hackathon, track "Agents That Do Real Work"): an on-call agent that diagnoses data incidents by walking DataHub lineage, proposes ranked root causes, and writes results (tags, descriptions, owners, postmortem documents) back into DataHub with a human approval gate. The full design and schedule live in `docs/plan-track-autonomous-agents.md`.
+Hindsight is a hackathon project (DataHub Agent Hackathon, track "Agents That Do Real Work"): an on-call agent that diagnoses data incidents by walking DataHub lineage, proposes ranked root causes, and writes results (tags, descriptions, owners, postmortem documents) back into DataHub with a human approval gate. `docs/design.md` is the frozen design document written before implementation — useful for the *why*, but it describes what was planned, not what was built; this file and `README.md` describe the system as it is. Delivery status lives in `SUBMISSION.md`.
 
 ## Commands
 

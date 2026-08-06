@@ -110,11 +110,12 @@ If the API runs elsewhere, set `VITE_API_URL` in `frontend/.env` (defaults to `h
 
 ## Demo scenarios
 
-`scenarios/scenarios.yaml` defines three reproducible scenarios; `examples/` holds the real artifacts (input, timeline, blast radius, postmortem, audit log) captured with `hindsight investigate ... --report <dir>`:
+`scenarios/scenarios.yaml` defines three reproducible scenarios; `examples/` holds the real artifacts (input, timeline, blast radius, postmortem, audit log). The first three were captured with `hindsight investigate ... --report <dir>`; the fourth is a run of the Skill alone, captured by hand:
 
 1. [`01-schema-drift`](examples/01-schema-drift/) — a simulated upstream migration (`scenarios/break_schema.py`) drops the `customer_id` NOT NULL constraint; the agent finds the migration note on the source, tags the degraded and impacted assets, and saves the postmortem.
 2. [`02-cold-vs-warm`](examples/02-cold-vs-warm/) ★ — the same incident twice. The cold run investigates from scratch (**29 DataHub tool calls**); the warm run's `recall` phase retrieves the postmortem the cold run just wrote and goes straight to the suspect ancestor (**17 calls, 41% fewer**). The two timelines sit side by side.
 3. [`03-orphaned-asset`](examples/03-orphaned-asset/) — a stale table nobody owns: besides the incident actions, the agent proposes `add_owners` to close the governance gap.
+4. [`04-skill-portability`](examples/04-skill-portability/) — the same incident as scenario 1, investigated by an agent driven only by the open source Skill, with no Hindsight code in the loop. Same asset, same owners, converging root cause.
 
 `scenarios/seed_incidents.py` loads six resolved historical postmortems into DataHub documents so `recall` has memory to work with.
 
@@ -143,10 +144,19 @@ frontend/src/
 
 scenarios/                  # seed_incidents.py, break_schema.py, scenarios.yaml
 examples/                   # real captured runs for the three demo scenarios
+skills/                     # datahub-incident-triage: this workflow as a portable Agent Skill
 docker-compose.yml          # backend + frontend against an external DataHub quickstart
 ```
 
 The frontend is deliberately dependency-free beyond React: native `EventSource` for streaming, plain CSS for the theme, no router or state library.
+
+## The workflow as a portable Skill
+
+[`skills/datahub-incident-triage/`](skills/datahub-incident-triage/) distills this agent into an [Agent Skills](https://skills.sh) package: the same seven-step procedure — memory first, blast radius, ranked hypotheses, approval gate, postmortem — as plain instructions, with no Python involved. Any compatible CLI (Claude Code, Cursor, Codex, Copilot, Gemini CLI, Windsurf) with DataHub connected gets the behaviour without cloning this repo.
+
+It is written against the same DataHub MCP tool names Hindsight uses, with `datahub` CLI fallbacks, and follows the conventions of [`datahub-project/datahub-skills`](https://github.com/datahub-project/datahub-skills). [`docs/publishing-the-skill.md`](docs/publishing-the-skill.md) documents how to open the upstream PR.
+
+It has been executed end to end: [`examples/04-skill-portability`](examples/04-skill-portability/) is the captured run of an agent following the skill alone — no backend code in the loop — reaching the same root cause and **the same fourteen owners** as scenario 1. It was a warm run against an already-populated memory, and that example documents the caveats. Verifying it surfaced three real defects in the skill, all since fixed.
 
 ## Tests
 

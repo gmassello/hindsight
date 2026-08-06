@@ -1,0 +1,70 @@
+[
+  {
+    "incident_id": "skill-run-2026-08-05",
+    "tool": "add_tags",
+    "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+    "args": {
+      "tag_urns": [
+        "urn:li:tag:hindsight-degraded"
+      ],
+      "entity_urns": [
+        "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)"
+      ]
+    },
+    "rationale": "Mark the broken Snowflake orders table as degraded: schema drift confirmed on customer_id.",
+    "via": "mcp",
+    "ok": true,
+    "error": null,
+    "response": "Successfully added 1 tag(s) to 1 entit(ies)"
+  },
+  {
+    "incident_id": "skill-run-2026-08-05",
+    "tool": "add_tags",
+    "urn": "urn:li:dashboard:(looker,b2fd91.dashboards.53)",
+    "args": {
+      "tag_urns": [
+        "urn:li:tag:hindsight-impacted"
+      ],
+      "entity_urns": [
+        "urn:li:dashboard:(looker,b2fd91.dashboards.53)"
+      ]
+    },
+    "rationale": "Highest-scoring downstream dashboard in the blast radius; consumers see wrong numbers.",
+    "via": "mcp",
+    "ok": true,
+    "error": null,
+    "response": "Successfully added 1 tag(s) to 1 entit(ies)"
+  },
+  {
+    "incident_id": "skill-run-2026-08-05",
+    "tool": "update_description",
+    "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+    "args": {
+      "entity_urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+      "operation": "append",
+      "description": "\n\n[INCIDENT] 2026-08-05 03:00 UTC — nulls in customer_id. Status: active. Root cause: the order_entry service dropped the NOT NULL constraint on customer_id upstream; the nulls propagate from the Postgres source through S3 into this table. See the postmortem document linked to this asset."
+    },
+    "rationale": "Incident banner so anyone opening the asset in the DataHub UI sees it. Operation is append, never replace: the skill forbids destroying existing documentation.",
+    "via": "mcp",
+    "ok": true,
+    "error": null,
+    "response": "Description updated successfully"
+  },
+  {
+    "incident_id": "skill-run-2026-08-05",
+    "tool": "save_document",
+    "urn": "urn:li:document:shared-4a4814c8-77ec-4448-83da-353db065b22b",
+    "args": {
+      "document_type": "Analysis",
+      "title": "Incident 2026-08-05: nulls in ORDERS (customer_id NOT NULL dropped upstream)",
+      "related_assets": [
+        "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)"
+      ]
+    },
+    "rationale": "Close the memory loop: this document is what the next investigation's recall step retrieves. document_type read from the live tool schema enum, not guessed.",
+    "via": "mcp",
+    "ok": true,
+    "error": null,
+    "response": "Successfully created document: Incident 2026-08-05: nulls in ORDERS (customer_id NOT NULL dropped upstream)"
+  }
+]

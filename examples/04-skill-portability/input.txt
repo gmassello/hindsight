@@ -1,0 +1,1 @@
+orders in order_entry_db is showing NULL values in customer_id since 03:00 UTC today, downstream order reports look wrong
