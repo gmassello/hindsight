@@ -2,7 +2,7 @@
 
 **The on-call agent for your data platform.** When something breaks, Hindsight walks the DataHub lineage graph to compute who is affected, proposes a root cause backed by incidents you already solved, and writes the postmortem back into DataHub — so the next diagnosis starts where this one ended.
 
-Built for the [Build with DataHub: The Agent Hackathon](https://datahub.devpost.com/) — track *Agents That Do Real Work*: agents that **read** DataHub to understand what is connected to what, **take action**, and **write the results back**.
+Built for the [Build with DataHub: The Agent Hackathon](https://datahub.devpost.com/) — track _Agents That Do Real Work_: agents that **read** DataHub to understand what is connected to what, **take action**, and **write the results back**.
 
 ## The closed loop
 
@@ -12,7 +12,7 @@ Hindsight is not a chatbot over metadata. Every investigation makes the next one
 2. **Act** — blast-radius scoring, ranked root-cause hypotheses with cited evidence, an action plan with a rationale per mutation.
 3. **Write back** — tags (`hindsight-degraded`, `hindsight-impacted`), incident banners in asset descriptions, owner assignments for governance gaps, and a structured postmortem document that the next run's memory search retrieves.
 
-A later run even benefits from the write-back directly: an ancestor already tagged `hindsight-degraded` is evidence for the *upstream incident* hypothesis — the system reads its own past actions.
+A later run even benefits from the write-back directly: an ancestor already tagged `hindsight-degraded` is evidence for the _upstream incident_ hypothesis — the system reads its own past actions.
 
 ## Architecture
 
@@ -28,9 +28,9 @@ A later run even benefits from the write-back directly: an ancestor already tagg
 
 ### Design decisions
 
-- **Deterministic phase pipeline, not a free ReAct loop.** The orchestrator decides *which* phase runs and *which* DataHub tools are available in it; the LLM decides *how* to interpret the results. Each phase emits timeline events (SSE-ready), can be tested in isolation, and degrades gracefully: non-critical phases fail into "continue with partial information" instead of killing the run.
+- **Deterministic phase pipeline, not a free ReAct loop.** The orchestrator decides _which_ phase runs and _which_ DataHub tools are available in it; the LLM decides _how_ to interpret the results. Each phase emits timeline events (SSE-ready), can be tested in isolation, and degrades gracefully: non-critical phases fail into "continue with partial information" instead of killing the run.
 - **Per-phase toolsets.** Investigation phases (1–4) only ever see read tools; mutation tools exist only in `commit`/`learn`. The model cannot write while it should be reading.
-- **Memory before investigation.** `recall` runs *before* `impact`/`root_cause`, and what it retrieves becomes `investigation_hints` that direct where the root-cause search looks first. Memory steers the investigation instead of decorating it.
+- **Memory before investigation.** `recall` runs _before_ `impact`/`root_cause`, and what it retrieves becomes `investigation_hints` that direct where the root-cause search looks first. Memory steers the investigation instead of decorating it.
 - **All math and writes are code.** The LLM reports facts (consumers found, hops, owners); the impact score is a deterministic formula, the mutations are executed by code with an audit log. `impact(consumer) = type_weight × 1/(1+hops) × owner/criticality/domain multipliers`.
 - **Human gate by default.** The agent can run autonomously (`--auto-approve`), but the default is a dry-run plan awaiting explicit approval. Every applied mutation is recorded in a JSONL audit log with timestamp, tool, URN, args and rationale.
 - **MCP first, GraphQL fallback.** DataHub access goes through the official [`mcp-server-datahub`](https://github.com/acryldata/mcp-server-datahub) (stdio, mutations enabled). If a mutation tool is missing or fails, the same mutation is applied through the GMS GraphQL API.
@@ -96,17 +96,17 @@ If the API runs elsewhere, set `VITE_API_URL` in `frontend/.env` (defaults to `h
 
 ## Configuration
 
-| Variable | Default | Purpose |
-|---|---|---|
-| `DATAHUB_GMS_URL` | `http://localhost:8080` | GMS endpoint |
-| `DATAHUB_GMS_TOKEN` | empty | PAT; empty works with quickstart (auth disabled) |
-| `DATAHUB_MCP_URL` | empty | Streamable-HTTP MCP endpoint (DataHub Cloud); empty spawns local stdio server |
-| `DATAHUB_MCP_COMMAND` | `uvx mcp-server-datahub` | Command for the stdio MCP server |
-| `LLM_PROVIDER` | `gemini` | `gemini` \| `anthropic` \| `bedrock` |
-| `HINDSIGHT_AUTO_APPROVE` | `false` | Skip the human gate (deliberately off by default) |
-| `HINDSIGHT_MAX_HOPS` | `3` | Downstream lineage depth |
-| `PHASE_MAX_TURNS` | `12` | LLM turn budget per phase |
-| `AUDIT_LOG_PATH` | `var/audit-log.jsonl` | Mutation audit log |
+| Variable                 | Default                  | Purpose                                                                       |
+| ------------------------ | ------------------------ | ----------------------------------------------------------------------------- |
+| `DATAHUB_GMS_URL`        | `http://localhost:8080`  | GMS endpoint                                                                  |
+| `DATAHUB_GMS_TOKEN`      | empty                    | PAT; empty works with quickstart (auth disabled)                              |
+| `DATAHUB_MCP_URL`        | empty                    | Streamable-HTTP MCP endpoint (DataHub Cloud); empty spawns local stdio server |
+| `DATAHUB_MCP_COMMAND`    | `uvx mcp-server-datahub` | Command for the stdio MCP server                                              |
+| `LLM_PROVIDER`           | `gemini`                 | `gemini` \| `anthropic` \| `bedrock`                                          |
+| `HINDSIGHT_AUTO_APPROVE` | `false`                  | Skip the human gate (deliberately off by default)                             |
+| `HINDSIGHT_MAX_HOPS`     | `3`                      | Downstream lineage depth                                                      |
+| `PHASE_MAX_TURNS`        | `12`                     | LLM turn budget per phase                                                     |
+| `AUDIT_LOG_PATH`         | `var/audit-log.jsonl`    | Mutation audit log                                                            |
 
 ## Demo scenarios
 
@@ -145,6 +145,7 @@ frontend/src/
 scenarios/                  # seed_incidents.py, break_schema.py, scenarios.yaml
 examples/                   # real captured runs for the three demo scenarios
 skills/                     # datahub-incident-triage: this workflow as a portable Agent Skill
+.claude/skills →            # symlink to skills/, so Claude Code discovers them in this repo
 docker-compose.yml          # backend + frontend against an external DataHub quickstart
 ```
 

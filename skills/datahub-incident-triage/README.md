@@ -11,6 +11,28 @@ On-call triage for data incidents — diagnose a broken asset by walking DataHub
 - **Proposes the write-back as a dry run** — incident tags, an incident banner on the asset, owners for governance gaps — and applies it **only after explicit approval**
 - **Saves the postmortem** back to DataHub, which is what the next investigation retrieves
 
+## Install
+
+Every Agent Skills-compatible agent reads skills from its own directory, so installing means copying this folder to the right place:
+
+| Agent                                     | Path                |
+| ----------------------------------------- | ------------------- |
+| Claude Code                               | `.claude/skills/`   |
+| Cursor, GitHub Copilot, Codex, Gemini CLI | `.agents/skills/`   |
+| Windsurf                                  | `.windsurf/skills/` |
+
+```bash
+cp -r skills/datahub-incident-triage <your-project>/.claude/skills/
+```
+
+Or let the [Skills CLI](https://github.com/vercel-labs/skills) detect the agent for you:
+
+```bash
+npx skills add gmassello/hindsight
+```
+
+In this repository `.claude/skills` is a symlink to `skills/`, so Claude Code picks this one up as `/datahub-incident-triage` — and any skill added later — without copying anything.
+
 ## Usage
 
 ```
