@@ -144,8 +144,9 @@ frontend/src/
 
 scenarios/                  # seed_incidents.py, break_schema.py, scenarios.yaml
 examples/                   # real captured runs for the three demo scenarios
-skills/                     # datahub-incident-triage: this workflow as a portable Agent Skill
-.claude/skills →            # symlink to skills/, so Claude Code discovers them in this repo
+.agents/skills/             # datahub-incident-triage: this workflow as a portable Agent Skill
+.claude/skills →            # symlink to .agents/skills/, so Claude Code discovers them in this repo
+AGENTS.md                   # agent instructions for this repo; CLAUDE.md just imports it
 docker-compose.yml          # backend + frontend against an external DataHub quickstart
 ```
 
@@ -153,7 +154,7 @@ The frontend is deliberately dependency-free beyond React: native `EventSource` 
 
 ## The workflow as a portable Skill
 
-[`skills/datahub-incident-triage/`](skills/datahub-incident-triage/) distills this agent into an [Agent Skills](https://skills.sh) package: the same seven-step procedure — memory first, blast radius, ranked hypotheses, approval gate, postmortem — as plain instructions, with no Python involved. Any compatible CLI (Claude Code, Cursor, Codex, Copilot, Gemini CLI, Windsurf) with DataHub connected gets the behaviour without cloning this repo.
+[`.agents/skills/datahub-incident-triage/`](.agents/skills/datahub-incident-triage/) distills this agent into an [Agent Skills](https://skills.sh) package: the same seven-step procedure — memory first, blast radius, ranked hypotheses, approval gate, postmortem — as plain instructions, with no Python involved. Any compatible CLI (Claude Code, Cursor, Codex, Copilot, Gemini CLI, Windsurf) with DataHub connected gets the behaviour without cloning this repo.
 
 It is written against the same DataHub MCP tool names Hindsight uses, with `datahub` CLI fallbacks, and follows the conventions of [`datahub-project/datahub-skills`](https://github.com/datahub-project/datahub-skills). [`docs/publishing-the-skill.md`](docs/publishing-the-skill.md) documents how to open the upstream PR.
 

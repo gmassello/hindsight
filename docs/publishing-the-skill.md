@@ -1,6 +1,6 @@
 # Cómo publicar la skill en `datahub-project/datahub-skills`
 
-Guía para llevar `skills/datahub-incident-triage/` al repo open source de DataHub y abrir el PR. **Nada de esto está ejecutado**: la skill vive en este repo y esto es el instructivo para publicarla cuando quieras.
+Guía para llevar `.agents/skills/datahub-incident-triage/` al repo open source de DataHub y abrir el PR. **Nada de esto está ejecutado**: la skill vive en este repo y esto es el instructivo para publicarla cuando quieras.
 
 Para el hackathon **alcanza con el link del PR** — no hace falta que lo mergeen.
 
@@ -24,7 +24,7 @@ gh repo fork datahub-project/datahub-skills --clone  # crea tu copia y la baja a
 cd datahub-skills
 git checkout -b feat/incident-triage-skill
 
-cp -r ~/Documents/hindsight/skills/datahub-incident-triage skills/
+cp -r ~/Documents/hindsight/.agents/skills/datahub-incident-triage skills/
 # + los archivos de la sección 3
 
 pre-commit run --all-files                           # el gate de la CI, antes de pushear
@@ -122,4 +122,4 @@ Reglas efectivas del repo:
 
 ## 6. Para el submission de Devpost
 
-El link del PR va en el campo de contribución open source. Si el PR todavía no está abierto el día de la entrega, sirve el link al directorio `skills/datahub-incident-triage/` de este repo — pero el PR es lo que cuenta para el bonus de la rúbrica.
+El link del PR va en el campo de contribución open source. Si el PR todavía no está abierto el día de la entrega, sirve el link al directorio `.agents/skills/datahub-incident-triage/` de este repo — pero el PR es lo que cuenta para el bonus de la rúbrica.

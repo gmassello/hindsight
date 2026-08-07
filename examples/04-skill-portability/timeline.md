@@ -1,7 +1,7 @@
 # Skill run — datahub-incident-triage
 
 Executed 2026-08-05 against the local DataHub quickstart by an agent following only
-`skills/datahub-incident-triage/SKILL.md`. No Hindsight backend code in the loop: the DataHub
+`.agents/skills/datahub-incident-triage/SKILL.md`. No Hindsight backend code in the loop: the DataHub
 MCP tools were called directly. Tool calls are numbered in the order they happened.
 
 ## step 1 — Parse the report

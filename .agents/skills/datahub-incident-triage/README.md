@@ -22,7 +22,7 @@ Every Agent Skills-compatible agent reads skills from its own directory, so inst
 | Windsurf                                  | `.windsurf/skills/` |
 
 ```bash
-cp -r skills/datahub-incident-triage <your-project>/.claude/skills/
+cp -r .agents/skills/datahub-incident-triage <your-project>/.claude/skills/
 ```
 
 Or let the [Skills CLI](https://github.com/vercel-labs/skills) detect the agent for you:
@@ -31,7 +31,7 @@ Or let the [Skills CLI](https://github.com/vercel-labs/skills) detect the agent 
 npx skills add gmassello/hindsight
 ```
 
-In this repository `.claude/skills` is a symlink to `skills/`, so Claude Code picks this one up as `/datahub-incident-triage` — and any skill added later — without copying anything.
+In this repository the skill lives at `.agents/skills/` and `.claude/skills` is a symlink to it, so Claude Code picks this one up as `/datahub-incident-triage` — and any skill added later — without copying anything.
 
 ## Usage
 

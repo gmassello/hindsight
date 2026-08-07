@@ -1,6 +1,6 @@
 # Scenario 04 — Skill portability
 
-**The question this run answers: does [`skills/datahub-incident-triage/`](../../skills/datahub-incident-triage/) actually work on its own, or is it a text file nobody ever executed?**
+**The question this run answers: does [`.agents/skills/datahub-incident-triage/`](../../.agents/skills/datahub-incident-triage/) actually work on its own, or is it a text file nobody ever executed?**
 
 The open source Skill is Hindsight's procedure distilled into instructions — no orchestrator, no
 Python, no scoring code. The claim it makes is that any Agent Skills-compatible CLI with DataHub
@@ -73,7 +73,7 @@ only visible because of it.
 
 Bring up DataHub (`colima start && datahub docker quickstart && datahub datapack load showcase-ecommerce`),
 plant the scenario with `backend/.venv/bin/python scenarios/break_schema.py`, point any
-Agent Skills-compatible CLI at `skills/datahub-incident-triage/` with the DataHub MCP server
+Agent Skills-compatible CLI at `.agents/skills/datahub-incident-triage/` with the DataHub MCP server
 configured, and paste `input.txt`. Mutation tools need `TOOLS_IS_MUTATION_ENABLED=true`.
 
 Numbers will differ — memory grows with every run, which is the entire point — but the resolved
