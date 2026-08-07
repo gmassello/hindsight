@@ -52,7 +52,7 @@ All six criteria weigh equally; each needs an explicit answer.
 
 | Criterion | Answer | Where the judges see it |
 |---|---|---|
-| Integration depth | ~12 MCP tools, read **and** mutation, multi-hop lineage, memory stored inside DataHub | Demo timeline + README section |
+| Integration depth | 13 MCP tools (8 read, 5 mutation), multi-hop lineage, memory stored inside DataHub | Demo timeline + README claims table |
 | Technical quality | Deterministic phase pipeline, per-phase toolset, dry-run, tests, GraphQL fallback | README "Design decisions" + `backend/tests/` |
 | Originality | The memory loop: the system improves with use and the knowledge lives in DataHub | Scenario 2 in the video |
 | Real-world applicability | Data on-call: concrete, expensive pain, backed by first-hand experience | First 20 seconds of the video |

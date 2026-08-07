@@ -48,20 +48,21 @@ Four phases (resolve, recall, impact, root_cause) are mini tool-using agents bui
 
 DataHub access (`datahub/mcp_client.py`) has two transports: streamable HTTP when `DATAHUB_MCP_URL` is set (DataHub Cloud), otherwise it spawns `uvx mcp-server-datahub` over stdio with `TOOLS_IS_MUTATION_ENABLED=true`. Tool schemas are discovered at runtime — never hardcode arg shapes; `propose` injects the live mutation schemas into its prompt, and `learn` reads the `document_type` enum from the live `save_document` schema. Read/write tool split uses MCP `readOnlyHint` annotations with a name-prefix fallback. Mutations that fail over MCP retry through `datahub/graphql_fallback.py` (GMS GraphQL, also creates tags via `ensure_tag`).
 
-The memory loop is the differentiator: `learn` saves the postmortem as a DataHub document; the next run's `recall` phase retrieves it via `search_documents`/`grep_documents` and turns it into `investigation_hints` that steer `root_cause`. Note the MCP server **hides the document tools when the catalog has zero documents** — recall treats their absence as cold start, not an error.
+The memory loop is the differentiator: `learn` saves the postmortem as a DataHub document; the next run's `recall` phase retrieves it via `search_documents`/`grep_documents` and turns it into `investigation_hints` that steer `root_cause`.
 
 The frontend (`frontend/src/`) is a single-page React app with zero runtime deps beyond react/react-dom: one custom hook `useInvestigation.ts` owns all state and the SSE lifecycle, `App.tsx` renders panels progressively as each phase's `result` event arrives. SSE contract quirks it depends on: the SSE event *name* is the TimelineEvent `kind` (not the phase), so every kind plus `state`/`agent_error` needs its own `addEventListener`; the stream is one-shot (409 on reopen), so the EventSource must be closed on the terminal `state`/`agent_error` frames to prevent the browser's auto-reconnect, and it is opened inside the `start()` handler (not an effect) so StrictMode's double mount can't hit the 409; `/approve` is a blocking 30–60s call, rendered as a "committing" state whose returned events are appended to the timeline afterwards.
 
 ## Gotchas learned the hard way
 
-- Gemini rejects `$ref`/`$defs` and unknown schema keys in function declarations; all normalization (ref inlining, key dropping, type uppercasing) lives in `llm/gemini_provider.py::_clean_schema` and must not be split across layers. Beware `_DROP_KEYS` vs. actual properties named `title` — property names under `properties` are never dropped.
-- Large `submit_*` payloads (30 consumers with URNs) exceed small `MAX_TOKENS`; it is 16384 for a reason.
-- `save_document` requires `document_type` from a server-defined enum (`Analysis`, `Note`, ...) — read it from the schema, don't guess.
+The runtime ones live in [`README.md` § Notes from the build](README.md#notes-from-the-build) — Gemini schema cleaning (and the `_DROP_KEYS` vs. a property actually named `title` trap), `MAX_TOKENS`, the `document_type` enum, the document tools the MCP server hides on an empty catalog, and the real signatures of `grep_documents` / `get_lineage_paths_between`. Read them before touching `llm/` or a phase's tool list.
+
+Only in here:
+
 - Tests mock both the LLM (`fake_llm` fixture) and DataHub (`FakeDataHub` in `tests/conftest.py`); orchestrator tests monkeypatch the phase lists with 4-tuples `(name, description, run, critical)`.
 
 ## Conventions
 
 - Code, docs, prompts and user-facing strings in English; conversation with the user in Spanish.
 - The repo owner's global rules apply: no code comments, no JavaDocs-style docs, surgical diffs.
-- Scope discipline: out of scope by design are warehouse SQL execution, PagerDuty/Slack/Jira integrations, multi-user auth, and incident detection/monitoring (see plan §3).
+- Scope discipline: the six things ruled out by design are listed in [`docs/design.md`](docs/design.md) §3.
 - Frontend: no new runtime dependencies (native `EventSource`/`fetch`, plain CSS, no router/state/chart libraries); no frontend test framework — `npm run build` is the gate.
