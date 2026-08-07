@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.13-blue.svg)](backend/pyproject.toml)
 
-**[The memory loop, measured](examples/02-cold-vs-warm/) · [Four captured runs](examples/) · [The workflow as a portable Skill](.agents/skills/datahub-incident-triage/)**
+**[The memory loop, measured](examples/02-cold-vs-warm/) · [Five captured runs](examples/) · [The workflow as a portable Skill](.agents/skills/datahub-incident-triage/) · [Proposed upstream](https://github.com/datahub-project/datahub-skills/pull/110)**
 
 The on-call agent for your data platform. When something breaks, Hindsight walks the DataHub lineage graph to compute who is affected, proposes a root cause backed by incidents you already solved, and writes the postmortem back into DataHub.
 
@@ -22,6 +22,7 @@ Every number in this README comes from a file in this repository.
 | Memory pays for itself: the same incident costs **29 tool calls cold and 17 warm** | [`02-cold-vs-warm/`](examples/02-cold-vs-warm/) |
 | Five runs against a live catalog, four of them written by `--report` and the fifth transcribed by hand | [`examples/`](examples/) |
 | The procedure runs with **no Hindsight code in the loop** — same URN, converging root cause, the same 14 owners | [`04-skill-portability/`](examples/04-skill-portability/) |
+| The skill is proposed upstream to the official DataHub skills repo | [datahub-project/datahub-skills#110](https://github.com/datahub-project/datahub-skills/pull/110) |
 
 ## The closed loop
 
@@ -149,7 +150,7 @@ Backend on `http://localhost:8000`, frontend on `http://localhost:5173`. The bac
 
 ## Demo scenarios
 
-`scenarios/scenarios.yaml` defines three reproducible scenarios; `examples/` holds the real artifacts (input, timeline, blast radius, postmortem, audit log). The first three were captured with `hindsight investigate ... --report <dir>`; the fourth is a run of the Skill alone, captured by hand:
+`scenarios/scenarios.yaml` defines three reproducible scenarios; `examples/` holds five captured runs across four directories, each with its input, timeline, blast radius, postmortem and audit log. Four were written by `hindsight investigate ... --report <dir>`; the fifth is a run of the Skill alone, transcribed by hand:
 
 1. [`01-schema-drift`](examples/01-schema-drift/) — a simulated upstream migration (`scenarios/break_schema.py`) drops the `customer_id` NOT NULL constraint; the agent traces the nulls to the Postgres ancestor a previous run had already tagged `hindsight-degraded`, tags the degraded and impacted assets, and saves the postmortem.
 2. [`02-cold-vs-warm`](examples/02-cold-vs-warm/) ★ — the same incident twice. The cold run investigates from scratch (**29 DataHub tool calls**); the warm run's `recall` phase retrieves the postmortem the cold run just wrote and goes straight to the suspect ancestor (**17 calls, 41% fewer**). The two timelines sit side by side.
@@ -213,7 +214,7 @@ frontend/src/
                             # BlastRadius, HypothesesPanel, PlanPanel
 
 scenarios/                  # seed_incidents.py, break_schema.py, scenarios.yaml
-examples/                   # real captured runs for the four demo scenarios
+examples/                   # five captured runs; 04 is not in scenarios.yaml
 .agents/skills/             # datahub-incident-triage: this workflow as a portable Agent Skill
 .claude/skills →            # symlink to .agents/skills/, so Claude Code discovers them in this repo
 AGENTS.md                   # agent instructions for this repo; CLAUDE.md just imports it
