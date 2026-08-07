@@ -1,13 +1,10 @@
-from datetime import UTC, datetime
-
 from hindsight.models import BlastRadius, InvestigationState
 
 
 def default_title(state: InvestigationState) -> str:
     asset = state.resolution.resolved_asset.name if state.resolution else "unknown asset"
     symptom = state.incident.symptom_type if state.incident else "incident"
-    date = datetime.now(UTC).strftime("%Y-%m-%d")
-    return f"Incident {date}: {symptom} in {asset}"
+    return f"Incident {state.started_at}: {symptom} in {asset}"
 
 
 def postmortem_title(state: InvestigationState) -> str:

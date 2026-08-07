@@ -72,9 +72,14 @@ def update_description(urn: str, description: str) -> None:
 
 
 def add_owners(urn: str, owners: list[str]) -> None:
+    bare = [o for o in owners if not o.startswith("urn:li:")]
+    if bare:
+        raise ValueError(
+            f"Owner identifiers must be full URNs, cannot tell a user from a group: {bare}"
+        )
     owner_inputs = [
         {
-            "ownerUrn": o if o.startswith("urn:li:") else f"urn:li:corpuser:{o}",
+            "ownerUrn": o,
             "ownerEntityType": "CORP_GROUP" if "corpGroup" in o else "CORP_USER",
             "type": "TECHNICAL_OWNER",
         }

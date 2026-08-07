@@ -11,9 +11,15 @@ Procedure:
 1. Use search with each mentioned asset name.
 2. If several candidates match, use get_entities to compare them and pick the one with the
    strongest signal: more downstream consumers, has an owner, has a domain, PROD environment.
+   It takes a list of urns, so fetch every candidate in one call.
 3. Call submit_resolution with the chosen asset. If there was any ambiguity, list the
    discarded candidates in alternatives and explain the choice in ambiguity_note.
-   Being explicit about ambiguity is required; silently guessing is not acceptable."""
+   Being explicit about ambiguity is required; silently guessing is not acceptable.
+   For the chosen asset and every alternative, report from get_entities:
+   - owners: owner URNs, empty list if none.
+   - domain: the domain URN, empty string if none.
+   Include siblings among the alternatives: one often carries the ownership and domain
+   the chosen asset lacks."""
 
 TOOLS = ["search", "get_entities"]
 

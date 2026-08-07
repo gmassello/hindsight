@@ -16,17 +16,21 @@ Available mutation tools and their exact argument schemas:
 Conventions:
 - Tag the broken asset with urn:li:tag:hindsight-degraded.
 - Tag affected downstream consumers (the highest-impact ones) with urn:li:tag:hindsight-impacted.
-- update_description on the broken asset: prepend a short warning with the incident date,
-  symptom and status so anyone opening the asset in the DataHub UI sees it
-  (operation must be one of the values allowed by the schema above).
-- If a critical asset in the incident path has no owner, propose add_owners: that is a
-  governance gap worth fixing (use owner URNs seen during the investigation).
+- update_description on the broken asset: prepend a short warning dated with detected_at
+  (or started_at if the report gives none), plus symptom and status, so anyone opening the
+  asset in the DataHub UI sees it (operation must be one of the values allowed above).
+- Resolved asset with empty owners: propose add_owners. Empty domain: propose set_domains.
+- Owner (urn:li:corpGroup/corpuser) and domain (urn:li:domain) URNs must be copied verbatim
+  from the investigation — a sibling asset usually carries the right one. Never invent or
+  complete one; with no URN to cite, skip the mutation.
 - Mutation targets (entity_urn / entity_urns) may only come from this list; a mutation
   targeting anything else is dropped:
 {urns}
 
 Each mutation needs a one-line rationale. Also give postmortem_title: a short, specific title
 for the incident postmortem document."""
+
+MAX_REPORT_CHARS = 4000
 
 
 def _seen_urns(ctx: Ctx) -> set[str]:
@@ -46,6 +50,8 @@ def _summary(ctx: Ctx) -> str:
     state = ctx.state
     return json.dumps(
         {
+            "incident_report": state.input_text[:MAX_REPORT_CHARS],
+            "started_at": state.started_at,
             "incident": state.incident.model_dump() if state.incident else None,
             "resolved_asset": state.resolution.model_dump() if state.resolution else None,
             "blast_radius": state.blast_radius.model_dump() if state.blast_radius else None,

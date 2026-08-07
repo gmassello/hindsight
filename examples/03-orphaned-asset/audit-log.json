@@ -1,7 +1,7 @@
 [
   {
-    "timestamp": "2026-08-03T23:05:01.808603+00:00",
-    "incident_id": "40168eef",
+    "timestamp": "2026-08-07T00:03:53.340793+00:00",
+    "incident_id": "e53eb86f",
     "tool": "add_tags",
     "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)",
     "args": {
@@ -9,43 +9,45 @@
         "urn:li:tag:hindsight-degraded"
       ],
       "entity_urns": [
-        "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)"
-      ]
-    },
-    "rationale": "Marking the order_history table as degraded due to identified freshness issues.",
-    "via": "mcp",
-    "ok": true,
-    "error": null
-  },
-  {
-    "timestamp": "2026-08-03T23:05:02.373119+00:00",
-    "incident_id": "40168eef",
-    "tool": "update_description",
-    "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)",
-    "args": {
-      "operation": "append",
-      "entity_urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)",
-      "description": "[INCIDENT] 2023-10-27: Freshness issue - data has not been updated since yesterday. Status: Investigation complete, pending pipeline fix."
-    },
-    "rationale": "Adding incident warning to the description for visibility.",
-    "via": "mcp",
-    "ok": true,
-    "error": null
-  },
-  {
-    "timestamp": "2026-08-03T23:05:02.878656+00:00",
-    "incident_id": "40168eef",
-    "tool": "add_tags",
-    "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_details,PROD)",
-    "args": {
-      "tag_urns": [
-        "urn:li:tag:hindsight-degraded"
-      ],
-      "entity_urns": [
+        "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)",
         "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_details,PROD)"
       ]
     },
-    "rationale": "Marking order_details as degraded as it likely shares the same upstream failure path.",
+    "rationale": "Tagging degraded analytics tables.",
+    "via": "mcp",
+    "ok": true,
+    "error": null
+  },
+  {
+    "timestamp": "2026-08-07T00:03:53.823984+00:00",
+    "incident_id": "e53eb86f",
+    "tool": "update_description",
+    "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)",
+    "args": {
+      "description": "[2026-08-06] WARNING: Data freshness failure. The table has not been updated since yesterday. Status: Investigation in progress.",
+      "operation": "append",
+      "entity_urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)"
+    },
+    "rationale": "Adding freshness warning to the affected Snowflake table.",
+    "via": "mcp",
+    "ok": true,
+    "error": null
+  },
+  {
+    "timestamp": "2026-08-07T00:03:54.261632+00:00",
+    "incident_id": "e53eb86f",
+    "tool": "add_owners",
+    "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)",
+    "args": {
+      "owner_urns": [
+        "urn:li:corpGroup:b2fd91.ORG_DATA_PLATFORM"
+      ],
+      "entity_urns": [
+        "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)"
+      ],
+      "ownership_type": "__system__technical_owner"
+    },
+    "rationale": "Assigning the data platform group as the technical owner of the order_history table.",
     "via": "mcp",
     "ok": true,
     "error": null

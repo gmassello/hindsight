@@ -22,3 +22,4 @@ def test_default_title_uses_asset_and_symptom():
     title = default_title(make_state())
     assert "fct_orders" in title
     assert "nulls" in title
+    assert "2026-08-08" in title

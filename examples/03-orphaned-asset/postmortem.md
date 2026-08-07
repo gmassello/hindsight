@@ -1,7 +1,7 @@
 # Freshness Failure in Snowflake Analytics Tables: order_history and order_details
 
 **Asset**: urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)
-**Detected**: unknown
+**Detected**: 2026-08-06
 **Symptom**: freshness — The order_history table in the analytics schema has not been updated since yesterday.
 **Status**: active
 
@@ -13,12 +13,15 @@ Owners notified: none
 |---|---|---|---|
 
 ## Root cause hypotheses
-1. The dbt build pipeline responsible for updating the order_history table has likely failed due to an orchestration or authentication error, consistent with known historical failures for this asset. — confidence 80%
-   - The table ORDER_HISTORY has a history of freshness issues related to dbt build pipeline failures, specifically authentication or orchestration execution errors, as noted in previous investigation logs. The current issue (freshness) matches this pattern.
-   - Evidence URNs: urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)
-2. A broader failure in the upstream ingestion pipeline or dbt orchestration environment is preventing both order_history and its sibling order_details from refreshing correctly. — confidence 40%
-   - The sibling table 'order_details' often experiences concurrent issues with 'order_history'. The lack of fresh data in both indicates a potential failure in the broader data ingestion or upstream pipeline feeding the analytics schema.
-   - Evidence URNs: urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_details,PROD), urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)
+1. Recurring upstream dbt pipeline orchestration or authentication failures are preventing the refresh of order_history and its sibling order_details. — confidence 80%
+   - The asset ORDER_HISTORY is tagged 'hindsight-degraded'.
+   - Documentation explicitly references repeated 'Freshness failure in order_entry_db analytics tables' and 'Freshness Failure in Snowflake Analytics Tables: order_history and order_details'.
+   - The sibling table 'order_details' also shows signs of being impacted.
+   - Evidence URNs: urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD), urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_details,PROD)
+2. A systemic issue in the upstream data ingestion pipeline for order_entry_db is causing simultaneous freshness failures in dependent analytics tables. — confidence 60%
+   - Both ORDER_HISTORY and its sibling ORDER_DETAILS (both part of the same data product) are failing to refresh simultaneously.
+   - This suggests a systemic failure in the shared dbt pipeline or upstream data ingestion process for the order_entry_db.
+   - Evidence URNs: urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD), urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_details,PROD)
 
 ## Resolution
 Pending human confirmation.

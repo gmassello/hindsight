@@ -18,6 +18,7 @@ def make_state(**overrides: Any) -> InvestigationState:
     fields: dict[str, Any] = {
         "id": "abc",
         "input_text": "nulls in fct_orders",
+        "started_at": "2026-08-08",
         "incident": Incident(
             symptom_type="nulls",
             symptom_description="customer_id is null",

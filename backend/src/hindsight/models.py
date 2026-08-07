@@ -1,4 +1,5 @@
 import uuid
+from datetime import UTC, datetime
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field
@@ -32,6 +33,8 @@ class EntityRef(BaseModel):
     urn: str
     name: str = ""
     type: str = ""
+    owners: list[str] = Field(default_factory=list)
+    domain: str = ""
 
 
 class ResolveResult(BaseModel):
@@ -134,6 +137,7 @@ class CommitRecord(BaseModel):
 class InvestigationState(BaseModel):
     id: str
     input_text: str
+    started_at: str = ""
     incident: Incident | None = None
     resolution: ResolveResult | None = None
     recall: RecallResult | None = None
@@ -149,4 +153,8 @@ class InvestigationState(BaseModel):
 
     @classmethod
     def new(cls, text: str) -> "InvestigationState":
-        return cls(id=uuid.uuid4().hex[:8], input_text=text)
+        return cls(
+            id=uuid.uuid4().hex[:8],
+            input_text=text,
+            started_at=datetime.now(UTC).strftime("%Y-%m-%d"),
+        )

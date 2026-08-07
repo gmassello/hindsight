@@ -37,13 +37,13 @@ A later run even benefits from the write-back directly: an ancestor already tagg
 
 ## Quickstart
 
-Prerequisites: Docker (or colima), Python 3.13, [uv](https://docs.astral.sh/uv/), a Gemini / Anthropic / Bedrock key.
+Prerequisites: Python 3.13+, [uv](https://docs.astral.sh/uv/), Node 20.19+ (for the web UI), a Gemini / Anthropic / Bedrock key, and Docker with at least 4 CPUs / 8 GB for the DataHub quickstart — on colima, `colima start --cpu 4 --memory 8`.
 
 ```bash
 # 1. Local DataHub with sample lineage
 uv tool install acryl-datahub
 datahub docker quickstart                       # UI at http://localhost:9002 (datahub/datahub)
-datahub datapack load showcase-ecommerce
+datahub datapack load showcase-ecommerce        # wait for the quickstart to report healthy first
 
 # 2. Backend
 cd backend
@@ -114,7 +114,7 @@ If the API runs elsewhere, set `VITE_API_URL` in `frontend/.env` (defaults to `h
 
 1. [`01-schema-drift`](examples/01-schema-drift/) — a simulated upstream migration (`scenarios/break_schema.py`) drops the `customer_id` NOT NULL constraint; the agent finds the migration note on the source, tags the degraded and impacted assets, and saves the postmortem.
 2. [`02-cold-vs-warm`](examples/02-cold-vs-warm/) ★ — the same incident twice. The cold run investigates from scratch (**29 DataHub tool calls**); the warm run's `recall` phase retrieves the postmortem the cold run just wrote and goes straight to the suspect ancestor (**17 calls, 41% fewer**). The two timelines sit side by side.
-3. [`03-orphaned-asset`](examples/03-orphaned-asset/) — a stale table nobody owns: besides the incident actions, the agent proposes `add_owners` to close the governance gap.
+3. [`03-orphaned-asset`](examples/03-orphaned-asset/) — a stale table nobody owns and nobody consumes: besides the incident actions, the agent assigns `add_owners` to close the governance gap. Owner and domain URNs are copied from what the investigation saw, never invented — a mutation the agent cannot ground in a real URN is skipped rather than guessed.
 4. [`04-skill-portability`](examples/04-skill-portability/) — the same incident as scenario 1, investigated by an agent driven only by the open source Skill, with no Hindsight code in the loop. Same asset, same owners, converging root cause.
 
 `scenarios/seed_incidents.py` loads six resolved historical postmortems into DataHub documents so `recall` has memory to work with.
