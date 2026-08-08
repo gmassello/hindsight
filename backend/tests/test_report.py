@@ -28,7 +28,15 @@ def test_write_report_produces_all_artifacts(tmp_path, monkeypatch):
     out = tmp_path / "report"
     _write_report(state, _events(), out)
 
-    for name in ["input.txt", "timeline.md", "blast-radius.md", "postmortem.md", "audit-log.json"]:
+    for name in [
+        "input.txt",
+        "timeline.md",
+        "blast-radius.md",
+        "postmortem.md",
+        "audit-log.json",
+        "events.json",
+        "state.json",
+    ]:
         assert (out / name).exists()
 
     timeline = (out / "timeline.md").read_text()

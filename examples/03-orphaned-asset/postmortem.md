@@ -1,7 +1,7 @@
-# Freshness Failure in Snowflake Analytics Tables: order_history and order_details
+# Staleness Incident in analytics.order_history (2026-08-07)
 
 **Asset**: urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)
-**Detected**: 2026-08-06
+**Detected**: 2026-08-07
 **Symptom**: freshness — The order_history table in the analytics schema has not been updated since yesterday.
 **Status**: active
 
@@ -13,15 +13,9 @@ Owners notified: none
 |---|---|---|---|
 
 ## Root cause hypotheses
-1. Recurring upstream dbt pipeline orchestration or authentication failures are preventing the refresh of order_history and its sibling order_details. — confidence 80%
-   - The asset ORDER_HISTORY is tagged 'hindsight-degraded'.
-   - Documentation explicitly references repeated 'Freshness failure in order_entry_db analytics tables' and 'Freshness Failure in Snowflake Analytics Tables: order_history and order_details'.
-   - The sibling table 'order_details' also shows signs of being impacted.
-   - Evidence URNs: urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD), urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_details,PROD)
-2. A systemic issue in the upstream data ingestion pipeline for order_entry_db is causing simultaneous freshness failures in dependent analytics tables. — confidence 60%
-   - Both ORDER_HISTORY and its sibling ORDER_DETAILS (both part of the same data product) are failing to refresh simultaneously.
-   - This suggests a systemic failure in the shared dbt pipeline or upstream data ingestion process for the order_entry_db.
-   - Evidence URNs: urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD), urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_details,PROD)
+1. The freshness issue in ORDER_HISTORY is caused by a failure in the upstream ORDERS table, which is currently experiencing an active incident ('hindsight-degraded') involving data quality problems that are propagating through the pipeline. — confidence 90%
+   - The ORDERS source table (urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)) is currently tagged as 'hindsight-degraded', indicating an active incident. Multiple recent documents (e.g., 2026-08-08 incident report) confirm ongoing data quality issues (NULLs in customer_id) in this table, which likely triggered the pipeline failure leading to the freshness issue in ORDER_HISTORY.
+   - Evidence URNs: urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)
 
 ## Resolution
 Pending human confirmation.

@@ -1,37 +1,36 @@
-# NULL Value Propagation in Order Entry Data Pipeline
+# Root Cause Analysis: NULL Propagation in Order Entry Pipeline
 
 **Asset**: urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)
-**Detected**: 03:00 UTC today
-**Symptom**: nulls — The customer_id column in the order_entry_db table contains NULL values.
+**Detected**: 2026-08-08 03:00 UTC
+**Symptom**: nulls — The customer_id column in the orders table within order_entry_db contains NULL values.
 **Status**: active
 
 ## Blast radius
-7 affected consumers within 5 hops. Score: 13.33
-Owners notified: urn:li:corpGroup:b2fd91.1e0398a3-113f-475e-b6fc-32ab72a634d2, urn:li:corpGroup:b2fd91.ORG_DATA_PLATFORM, urn:li:corpuser:b2fd91.brock1@example.com, urn:li:corpuser:b2fd91.sam@example.com
+6 affected consumers within 2 hops. Score: 17.55
+Owners notified: urn:li:corpuser:b2fd91.EMP006, urn:li:corpuser:b2fd91.brock1@example.com, urn:li:corpuser:b2fd91.kirk@example.com, urn:li:corpuser:b2fd91.marty@example.com, urn:li:corpuser:b2fd91.michael@example.com, urn:li:corpuser:b2fd91.sam@example.com
 
 | Asset | Type | Hops | Score |
 |---|---|---|---|
-| datahub_order_entries | DASHBOARD | 3 | 2.93 |
-| order_details | DATASET | 1 | 1.95 |
-| orders | DATASET | 1 | 1.95 |
-| Order Entry Dashboard | DASHBOARD | 5 | 1.95 |
-| Order Entry Dashboard | DASHBOARD | 5 | 1.95 |
-| ORDER_HISTORY | DATASET | 2 | 1.3 |
-| ORDER_DETAILS | DATASET | 2 | 1.3 |
+| Order Entry Dashboard (Looker) | DASHBOARD | 2 | 3.9 |
+| Order Entry Dashboard (Tableau) | DASHBOARD | 2 | 3.9 |
+| datahub_order_entries (PowerBI) | DASHBOARD | 2 | 3.9 |
+| order_details (Snowflake) | DATASET | 1 | 1.95 |
+| order_history (dbt) | DATASET | 1 | 1.95 |
+| order_details (dbt) | DATASET | 1 | 1.95 |
 
 ## Root cause hypotheses
-1. The NULL values are propagating from an upstream Postgres production database where the data quality is compromised. This is a known issue as indicated by the incident metadata and documentation. — confidence 80%
-   - The incident was identified in the Postgres source table that precedes the Snowflake ORDERS dataset. The Snowflake schema definition shows the customer_id column as nullable, and multiple documents confirm this has been an ongoing issue related to upstream ingestion.
-   - Evidence URNs: urn:li:dataset:(urn:li:dataPlatform:postgres,b2fd91.order_entry_db.order_entry.orders,PROD), urn:li:document:shared-569e7efd-5924-430f-8523-33ee4de9dae0
-2. A configuration drift in schema enforcement between the S3 ingestion layer and the downstream storage tables (Postgres/Snowflake) is allowing nulls to be written into the customer_id field. — confidence 40%
-   - There is a disparity in column nullability between the source S3 bucket and the downstream tables. While the S3 source schema is strict (non-nullable), the downstream Postgres and Snowflake tables allow nulls, facilitating the propagation of invalid/missing data.
-   - Evidence URNs: urn:li:dataset:(urn:li:dataPlatform:s3,b2fd91.demo-data-bucket/order_entry/orders,PROD), urn:li:dataset:(urn:li:dataPlatform:postgres,b2fd91.order_entry_db.order_entry.orders,PROD)
+1. Schema drift between the upstream S3 source and the Snowflake target table has enabled nullable customer_id fields, causing NULL values to enter the warehouse. — confidence 80%
+   - The upstream S3 source schema defines customer_id as nullable=false, but the downstream Snowflake table schema defines it as nullable=true, allowing potential NULL propagation.
+   - Evidence URNs: urn:li:dataset:(urn:li:dataPlatform:s3,b2fd91.demo-data-bucket/order_entry/orders,PROD), urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)
+2. Logic errors within the Spark ingestion pipeline may be inadvertently introducing or failing to filter NULL customer_id values during the transition from S3 to Snowflake. — confidence 60%
+   - The spark ingestion pipeline 'import_table_orders_to_snowflake' is a known point of failure for logic errors and is the direct parent of the affected table.
+   - Evidence URNs: urn:li:dataJob:(urn:li:dataFlow:(spark,b2fd91.import_table_orders_to_snowflake,b2fd91.default),b2fd91.import_table_orders_to_snowflake)
 
 ## Resolution
 Pending human confirmation.
 
 ## Detection signals
-Watch for upstream incident on the assets cited above.
+Watch for schema drift upstream on the assets cited above.
 
 ## Tags
-hindsight, nulls, upstream_incident
+hindsight, nulls, schema_drift_upstream

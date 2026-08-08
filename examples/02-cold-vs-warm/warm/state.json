@@ -1,0 +1,254 @@
+{
+  "id": "2c904926",
+  "input_text": "orders in order_entry_db is showing NULL values in customer_id since 03:00 UTC today, downstream order reports look wrong",
+  "started_at": "2026-08-08",
+  "incident": {
+    "mentioned_assets": [
+      "orders",
+      "order_entry_db",
+      "order reports"
+    ],
+    "symptom_type": "nulls",
+    "symptom_description": "The customer_id column in the orders table within order_entry_db contains NULL values.",
+    "detected_at": "2026-08-08 03:00 UTC"
+  },
+  "resolution": {
+    "resolved_asset": {
+      "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+      "name": "orders (Snowflake)",
+      "type": "dataset",
+      "owners": [
+        "urn:li:corpGroup:b2fd91.ORG_DATA_PLATFORM",
+        "urn:li:corpuser:b2fd91.EMP006"
+      ],
+      "domain": "urn:li:domain:b2fd91.1caf2b7c-ca73-4708-bdec-6687d78cab0e"
+    },
+    "alternatives": [],
+    "ambiguity_note": "The `orders` table exists in Snowflake, DBT (as a source), and Postgres. The Snowflake version is the primary production table containing the described data quality issue (as confirmed by the incident notice in its editable properties). The DBT asset is a source representation, and the Postgres version is another environment. I have selected the Snowflake table as the primary source of the issue. The PowerBI dashboard `datahub_order_entries` is identified as the impacted downstream report."
+  },
+  "recall": {
+    "prior_incidents": [
+      {
+        "title": "2026-08-08 Unexpected NULLs in Order Entry customer_id Column",
+        "reference": "urn:li:document:shared-bb0cf27d-a698-4a1a-820e-831e6f8632d0",
+        "similarity": "high",
+        "prior_resolution": "The document was titled 'active' when ingested, but indicates potential upstream S3 data changes or Spark ingestion pipeline (import_table_orders_to_snowflake) logic issues. Typical resolution involves verifying the upstream source schema and checking the transformation logic in the Spark job.",
+        "summary": "Unexpected NULLs in Order Entry customer_id Column on the same table."
+      }
+    ],
+    "investigation_hints": [
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+        "cause_type": "schema_drift_upstream",
+        "reason": "Previous incidents suggest upstream data drift or schema mismatch where source S3 data might have changed constraints not reflected or handled correctly in downstream Snowflake ingestion."
+      },
+      {
+        "urn": "urn:li:dataJob:(urn:li:dataFlow:(spark,b2fd91.import_table_orders_to_snowflake,b2fd91.default),b2fd91.import_table_orders_to_snowflake)",
+        "cause_type": "upstream_incident",
+        "reason": "The Spark ingestion pipeline 'import_table_orders_to_snowflake' has been previously identified as a potential source of logic errors (e.g., incorrect join types) that introduce NULL values."
+      }
+    ]
+  },
+  "blast_radius": {
+    "impacted": [
+      {
+        "urn": "urn:li:dashboard:(looker,b2fd91.dashboards.53)",
+        "name": "Order Entry Dashboard (Looker)",
+        "type": "DASHBOARD",
+        "hops": 2,
+        "score": 3.9,
+        "owners": [
+          "urn:li:corpuser:b2fd91.EMP006"
+        ]
+      },
+      {
+        "urn": "urn:li:dashboard:(tableau,b2fd91.843bf583-900b-f1ba-0532-b5e67a0373dc)",
+        "name": "Order Entry Dashboard (Tableau)",
+        "type": "DASHBOARD",
+        "hops": 2,
+        "score": 3.9,
+        "owners": [
+          "urn:li:corpuser:b2fd91.brock1@example.com"
+        ]
+      },
+      {
+        "urn": "urn:li:dashboard:(powerbi,b2fd91.reports.66666666-7777-8888-9999-000000000000)",
+        "name": "datahub_order_entries (PowerBI)",
+        "type": "DASHBOARD",
+        "hops": 2,
+        "score": 3.9,
+        "owners": [
+          "urn:li:corpuser:b2fd91.sam@example.com",
+          "urn:li:corpuser:b2fd91.michael@example.com"
+        ]
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_details,PROD)",
+        "name": "order_details (Snowflake)",
+        "type": "DATASET",
+        "hops": 1,
+        "score": 1.95,
+        "owners": [
+          "urn:li:corpuser:b2fd91.marty@example.com",
+          "urn:li:corpuser:b2fd91.EMP006"
+        ]
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:dbt,b2fd91.ORDER_ENTRY_DB.analytics.order_history,PROD)",
+        "name": "order_history (dbt)",
+        "type": "DATASET",
+        "hops": 1,
+        "score": 1.95,
+        "owners": [
+          "urn:li:corpuser:b2fd91.kirk@example.com"
+        ]
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:dbt,b2fd91.ORDER_ENTRY_DB.analytics.order_details,PROD)",
+        "name": "order_details (dbt)",
+        "type": "DATASET",
+        "hops": 1,
+        "score": 1.95,
+        "owners": [
+          "urn:li:corpuser:b2fd91.marty@example.com",
+          "urn:li:corpuser:b2fd91.sam@example.com"
+        ]
+      }
+    ],
+    "total_score": 17.55,
+    "owners_to_notify": [
+      "urn:li:corpuser:b2fd91.EMP006",
+      "urn:li:corpuser:b2fd91.brock1@example.com",
+      "urn:li:corpuser:b2fd91.kirk@example.com",
+      "urn:li:corpuser:b2fd91.marty@example.com",
+      "urn:li:corpuser:b2fd91.michael@example.com",
+      "urn:li:corpuser:b2fd91.sam@example.com"
+    ]
+  },
+  "hypotheses": [
+    {
+      "cause_type": "schema_drift_upstream",
+      "statement": "Schema drift between the upstream S3 source and the Snowflake target table has enabled nullable customer_id fields, causing NULL values to enter the warehouse.",
+      "confidence": 0.8,
+      "evidence": [
+        "The upstream S3 source schema defines customer_id as nullable=false, but the downstream Snowflake table schema defines it as nullable=true, allowing potential NULL propagation."
+      ],
+      "evidence_urns": [
+        "urn:li:dataset:(urn:li:dataPlatform:s3,b2fd91.demo-data-bucket/order_entry/orders,PROD)",
+        "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)"
+      ]
+    },
+    {
+      "cause_type": "upstream_incident",
+      "statement": "Logic errors within the Spark ingestion pipeline may be inadvertently introducing or failing to filter NULL customer_id values during the transition from S3 to Snowflake.",
+      "confidence": 0.6,
+      "evidence": [
+        "The spark ingestion pipeline 'import_table_orders_to_snowflake' is a known point of failure for logic errors and is the direct parent of the affected table."
+      ],
+      "evidence_urns": [
+        "urn:li:dataJob:(urn:li:dataFlow:(spark,b2fd91.import_table_orders_to_snowflake,b2fd91.default),b2fd91.import_table_orders_to_snowflake)"
+      ]
+    }
+  ],
+  "plan": {
+    "mutations": [
+      {
+        "tool": "add_tags",
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+        "args": {
+          "tag_urns": [
+            "urn:li:tag:hindsight-degraded"
+          ],
+          "entity_urns": [
+            "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)"
+          ]
+        },
+        "rationale": "Tagging the primary broken asset with hindsight-degraded."
+      },
+      {
+        "tool": "update_description",
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+        "args": {
+          "entity_urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+          "description": "### [2026-08-08 03:00 UTC] Incident: Null values in customer_id\nThe 'customer_id' column in this table contains NULL values. This issue is actively being investigated.",
+          "operation": "append"
+        },
+        "rationale": "Adding a warning to the description of the broken asset."
+      },
+      {
+        "tool": "add_tags",
+        "urn": "urn:li:dashboard:(looker,b2fd91.dashboards.53)",
+        "args": {
+          "entity_urns": [
+            "urn:li:dashboard:(looker,b2fd91.dashboards.53)",
+            "urn:li:dashboard:(tableau,b2fd91.843bf583-900b-f1ba-0532-b5e67a0373dc)",
+            "urn:li:dashboard:(powerbi,b2fd91.reports.66666666-7777-8888-9999-000000000000)",
+            "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_details,PROD)",
+            "urn:li:dataset:(urn:li:dataPlatform:dbt,b2fd91.ORDER_ENTRY_DB.analytics.order_history,PROD)",
+            "urn:li:dataset:(urn:li:dataPlatform:dbt,b2fd91.ORDER_ENTRY_DB.analytics.order_details,PROD)"
+          ],
+          "tag_urns": [
+            "urn:li:tag:hindsight-impacted"
+          ]
+        },
+        "rationale": "Tagging the high-impact downstream assets with hindsight-impacted."
+      }
+    ],
+    "postmortem_title": "Root Cause Analysis: NULL Propagation in Order Entry Pipeline"
+  },
+  "committed": [
+    {
+      "tool": "add_tags",
+      "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+      "args": {
+        "tag_urns": [
+          "urn:li:tag:hindsight-degraded"
+        ],
+        "entity_urns": [
+          "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)"
+        ]
+      },
+      "rationale": "Tagging the primary broken asset with hindsight-degraded.",
+      "via": "mcp",
+      "ok": true,
+      "error": null
+    },
+    {
+      "tool": "update_description",
+      "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+      "args": {
+        "entity_urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+        "description": "### [2026-08-08 03:00 UTC] Incident: Null values in customer_id\nThe 'customer_id' column in this table contains NULL values. This issue is actively being investigated.",
+        "operation": "append"
+      },
+      "rationale": "Adding a warning to the description of the broken asset.",
+      "via": "mcp",
+      "ok": true,
+      "error": null
+    },
+    {
+      "tool": "add_tags",
+      "urn": "urn:li:dashboard:(looker,b2fd91.dashboards.53)",
+      "args": {
+        "entity_urns": [
+          "urn:li:dashboard:(looker,b2fd91.dashboards.53)",
+          "urn:li:dashboard:(tableau,b2fd91.843bf583-900b-f1ba-0532-b5e67a0373dc)",
+          "urn:li:dashboard:(powerbi,b2fd91.reports.66666666-7777-8888-9999-000000000000)",
+          "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_details,PROD)",
+          "urn:li:dataset:(urn:li:dataPlatform:dbt,b2fd91.ORDER_ENTRY_DB.analytics.order_history,PROD)",
+          "urn:li:dataset:(urn:li:dataPlatform:dbt,b2fd91.ORDER_ENTRY_DB.analytics.order_details,PROD)"
+        ],
+        "tag_urns": [
+          "urn:li:tag:hindsight-impacted"
+        ]
+      },
+      "rationale": "Tagging the high-impact downstream assets with hindsight-impacted.",
+      "via": "mcp",
+      "ok": true,
+      "error": null
+    }
+  ],
+  "postmortem_ref": "urn:li:document:shared-a9ca759c-29c8-401d-a779-9d16f9d2bbb7",
+  "tool_calls": 15,
+  "status": "done"
+}

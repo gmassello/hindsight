@@ -1,14 +1,13 @@
 # Blast radius
 
-Total score: 13.33
-Owners to notify: urn:li:corpGroup:b2fd91.1e0398a3-113f-475e-b6fc-32ab72a634d2, urn:li:corpGroup:b2fd91.ORG_DATA_PLATFORM, urn:li:corpuser:b2fd91.brock1@example.com, urn:li:corpuser:b2fd91.sam@example.com
+Total score: 17.55
+Owners to notify: urn:li:corpuser:b2fd91.EMP006, urn:li:corpuser:b2fd91.brock1@example.com, urn:li:corpuser:b2fd91.kirk@example.com, urn:li:corpuser:b2fd91.marty@example.com, urn:li:corpuser:b2fd91.michael@example.com, urn:li:corpuser:b2fd91.sam@example.com
 
 | Asset | Type | Hops | Score | Owners |
 |---|---|---|---|---|
-| datahub_order_entries | DASHBOARD | 3 | 2.93 | urn:li:corpuser:b2fd91.sam@example.com |
-| order_details | DATASET | 1 | 1.95 | urn:li:corpGroup:b2fd91.ORG_DATA_PLATFORM |
-| orders | DATASET | 1 | 1.95 | urn:li:corpGroup:b2fd91.ORG_DATA_PLATFORM |
-| Order Entry Dashboard | DASHBOARD | 5 | 1.95 | urn:li:corpGroup:b2fd91.ORG_DATA_PLATFORM |
-| Order Entry Dashboard | DASHBOARD | 5 | 1.95 | urn:li:corpuser:b2fd91.brock1@example.com |
-| ORDER_HISTORY | DATASET | 2 | 1.3 | urn:li:corpGroup:b2fd91.ORG_DATA_PLATFORM |
-| ORDER_DETAILS | DATASET | 2 | 1.3 | urn:li:corpGroup:b2fd91.1e0398a3-113f-475e-b6fc-32ab72a634d2 |
+| Order Entry Dashboard (Looker) | DASHBOARD | 2 | 3.9 | urn:li:corpuser:b2fd91.EMP006 |
+| Order Entry Dashboard (Tableau) | DASHBOARD | 2 | 3.9 | urn:li:corpuser:b2fd91.brock1@example.com |
+| datahub_order_entries (PowerBI) | DASHBOARD | 2 | 3.9 | urn:li:corpuser:b2fd91.sam@example.com, urn:li:corpuser:b2fd91.michael@example.com |
+| order_details (Snowflake) | DATASET | 1 | 1.95 | urn:li:corpuser:b2fd91.marty@example.com, urn:li:corpuser:b2fd91.EMP006 |
+| order_history (dbt) | DATASET | 1 | 1.95 | urn:li:corpuser:b2fd91.kirk@example.com |
+| order_details (dbt) | DATASET | 1 | 1.95 | urn:li:corpuser:b2fd91.marty@example.com, urn:li:corpuser:b2fd91.sam@example.com |

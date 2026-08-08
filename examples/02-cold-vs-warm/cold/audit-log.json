@@ -1,7 +1,7 @@
 [
   {
-    "timestamp": "2026-08-03T22:02:52.458247+00:00",
-    "incident_id": "40efdcce",
+    "timestamp": "2026-08-08T00:20:01.548337+00:00",
+    "incident_id": "013abb17",
     "tool": "add_tags",
     "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
     "args": {
@@ -12,62 +12,42 @@
         "urn:li:tag:hindsight-degraded"
       ]
     },
-    "rationale": "Tag the primary degraded dataset containing NULL customer_id values.",
+    "rationale": "Tagging the primary broken asset as degraded.",
     "via": "mcp",
     "ok": true,
     "error": null
   },
   {
-    "timestamp": "2026-08-03T22:03:08.123413+00:00",
-    "incident_id": "40efdcce",
-    "tool": "add_tags",
-    "urn": "urn:li:dashboard:(powerbi,b2fd91.reports.66666666-7777-8888-9999-000000000000)",
-    "args": {
-      "entity_urns": [
-        "urn:li:dashboard:(powerbi,b2fd91.reports.66666666-7777-8888-9999-000000000000)",
-        "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_details,PROD)",
-        "urn:li:dashboard:(tableau,b2fd91.843bf583-900b-f1ba-0532-b5e67a0373dc)",
-        "urn:li:dashboard:(looker,b2fd91.dashboards.53)"
-      ],
-      "tag_urns": [
-        "urn:li:tag:hindsight-impacted"
-      ]
-    },
-    "rationale": "Tag high-impact downstream consumers affected by missing customer_id values.",
-    "via": "mcp",
-    "ok": true,
-    "error": null
-  },
-  {
-    "timestamp": "2026-08-03T22:03:11.087808+00:00",
-    "incident_id": "40efdcce",
+    "timestamp": "2026-08-08T00:20:02.046581+00:00",
+    "incident_id": "013abb17",
     "tool": "update_description",
     "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
     "args": {
       "operation": "append",
-      "description": "WARNING [03:00 UTC]: Asset degraded due to unexpected NULL values in customer_id column originating from upstream source ingestion.",
-      "entity_urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)"
+      "entity_urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+      "description": "## \u26a0\ufe0f Incident Notice: 2026-08-08 03:00 UTC\nThe 'customer_id' column in this table is unexpectedly containing NULL values due to an upstream schema change. Downstream reports are impacted. Investigation is underway."
     },
-    "rationale": "Append incident status warning to dataset description for UI visibility.",
+    "rationale": "Adding incident warning to the broken asset description.",
     "via": "mcp",
     "ok": true,
     "error": null
   },
   {
-    "timestamp": "2026-08-03T22:03:16.191226+00:00",
-    "incident_id": "40efdcce",
-    "tool": "add_owners",
-    "urn": "urn:li:dashboard:(looker,b2fd91.dashboards.53)",
+    "timestamp": "2026-08-08T00:20:02.666716+00:00",
+    "incident_id": "013abb17",
+    "tool": "add_tags",
+    "urn": "urn:li:dashboard:(powerbi,b2fd91.reports.66666666-7777-8888-9999-000000000000)",
     "args": {
-      "ownership_type": "__system__technical_owner",
-      "entity_urns": [
-        "urn:li:dashboard:(looker,b2fd91.dashboards.53)"
+      "tag_urns": [
+        "urn:li:tag:hindsight-impacted"
       ],
-      "owner_urns": [
-        "urn:li:corpGroup:b2fd91.ORG_DATA_PLATFORM"
+      "entity_urns": [
+        "urn:li:dashboard:(powerbi,b2fd91.reports.66666666-7777-8888-9999-000000000000)",
+        "urn:li:dashboard:(looker,b2fd91.dashboards.53)",
+        "urn:li:dataset:(urn:li:dataPlatform:dbt,b2fd91.ORDER_ENTRY_DB.analytics.order_details,PROD)"
       ]
     },
-    "rationale": "Assign technical ownership to unowned critical downstream Looker dashboard in incident path.",
+    "rationale": "Tagging high-impact downstream consumers as impacted.",
     "via": "mcp",
     "ok": true,
     "error": null

@@ -1,7 +1,7 @@
 [
   {
-    "timestamp": "2026-08-03T22:58:08.204169+00:00",
-    "incident_id": "73759c58",
+    "timestamp": "2026-08-08T00:25:43.111705+00:00",
+    "incident_id": "8c7bff59",
     "tool": "add_tags",
     "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
     "args": {
@@ -12,42 +12,41 @@
         "urn:li:tag:hindsight-degraded"
       ]
     },
-    "rationale": "Mark the primary Snowflake orders dataset as degraded due to null value propagation.",
+    "rationale": "Tagging degraded snowflake orders dataset with hindsight-degraded.",
     "via": "mcp",
     "ok": true,
     "error": null
   },
   {
-    "timestamp": "2026-08-03T22:58:08.710509+00:00",
-    "incident_id": "73759c58",
+    "timestamp": "2026-08-08T00:25:43.604897+00:00",
+    "incident_id": "8c7bff59",
     "tool": "update_description",
     "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
     "args": {
-      "entity_urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
-      "description": "**[INCIDENT 03:00 UTC]** The 'customer_id' column contains unexpected NULL values due to an upstream Postgres data quality issue. Data quality is currently degraded.",
-      "operation": "append"
+      "description": "## Incident Report - 2026-08-08 03:00 UTC\nSymptom: customer_id column contains NULL values.\nStatus: Investigation ongoing. Downstream data quality impacted.",
+      "operation": "replace",
+      "entity_urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)"
     },
-    "rationale": "Add a warning description to the Snowflake orders dataset to notify users of the ongoing null value incident.",
+    "rationale": "Adding incident warning to the snowflake orders dataset description.",
     "via": "mcp",
     "ok": true,
     "error": null
   },
   {
-    "timestamp": "2026-08-03T22:58:09.160007+00:00",
-    "incident_id": "73759c58",
+    "timestamp": "2026-08-08T00:25:44.094281+00:00",
+    "incident_id": "8c7bff59",
     "tool": "add_tags",
-    "urn": "urn:li:dashboard:(looker,b2fd91.dashboards.53)",
+    "urn": "urn:li:dashboard:(powerbi,b2fd91.reports.66666666-7777-8888-9999-000000000000)",
     "args": {
       "tag_urns": [
         "urn:li:tag:hindsight-impacted"
       ],
       "entity_urns": [
-        "urn:li:dashboard:(looker,b2fd91.dashboards.53)",
         "urn:li:dashboard:(powerbi,b2fd91.reports.66666666-7777-8888-9999-000000000000)",
-        "urn:li:dashboard:(tableau,b2fd91.843bf583-900b-f1ba-0532-b5e67a0373dc)"
+        "urn:li:dataset:(urn:li:dataPlatform:dbt,b2fd91.ORDER_ENTRY_DB.analytics.order_details,PROD)"
       ]
     },
-    "rationale": "Flag primary downstream dashboards as impacted by the data quality incident.",
+    "rationale": "Tagging high-impact downstream assets (Power BI report and dbt order_details) as impacted.",
     "via": "mcp",
     "ok": true,
     "error": null

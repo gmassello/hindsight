@@ -1,0 +1,347 @@
+{
+  "id": "8c7bff59",
+  "input_text": "orders in order_entry_db is showing NULL values in customer_id since 03:00 UTC today, downstream order reports look wrong",
+  "started_at": "2026-08-08",
+  "incident": {
+    "mentioned_assets": [
+      "orders",
+      "order_entry_db",
+      "order reports"
+    ],
+    "symptom_type": "nulls",
+    "symptom_description": "The customer_id column in the orders table within order_entry_db contains NULL values.",
+    "detected_at": "2026-08-08 03:00 UTC"
+  },
+  "resolution": {
+    "resolved_asset": {
+      "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+      "name": "orders (snowflake)",
+      "type": "",
+      "owners": [],
+      "domain": ""
+    },
+    "alternatives": [
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:dbt,b2fd91.order_entry_db.order_entry.orders,PROD)",
+        "name": "orders (dbt source)",
+        "type": "",
+        "owners": [],
+        "domain": ""
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:postgres,b2fd91.order_entry_db.order_entry.orders,PROD)",
+        "name": "orders (postgres)",
+        "type": "",
+        "owners": [],
+        "domain": ""
+      }
+    ],
+    "ambiguity_note": "The snowflake table contains a explicit incident notification regarding the 'customer_id' NULL issue described in the report, making it the definitive source for this incident. Other representations (dbt, postgres) are alternative views/sources of the same underlying data."
+  },
+  "recall": {
+    "prior_incidents": [
+      {
+        "title": "2026-08-08 Unexpected NULLs in Order Entry customer_id Column",
+        "reference": "urn:li:document:shared-bb0cf27d-a698-4a1a-820e-831e6f8632d0",
+        "similarity": "high",
+        "prior_resolution": "Pipeline logic fixed to remove erroneous outer joins and added validation checks to ensure non-nullable fields are populated.",
+        "summary": "Previously encountered the exact same symptom in the same orders table. Identified issue as logic errors in the ingestion pipeline leading to NULL propagation."
+      }
+    ],
+    "investigation_hints": [
+      {
+        "urn": "urn:li:dataJob:(urn:li:dataFlow:(spark,b2fd91.import_table_orders_to_snowflake,b2fd91.default),b2fd91.import_table_orders_to_snowflake)",
+        "cause_type": "data_source_issue",
+        "reason": "Previous investigations suggested logic errors in the ingestion pipeline (incorrect join types or record filtering) result in NULLs for customer_id. Check the import_table_orders_to_snowflake data job."
+      }
+    ]
+  },
+  "blast_radius": {
+    "impacted": [
+      {
+        "urn": "urn:li:dashboard:(powerbi,b2fd91.reports.66666666-7777-8888-9999-000000000000)",
+        "name": "datahub_order_entries (Power BI)",
+        "type": "DASHBOARD",
+        "hops": 3,
+        "score": 2.25,
+        "owners": [
+          "urn:li:corpuser:b2fd91.sam@example.com",
+          "urn:li:corpuser:b2fd91.michael@example.com",
+          "urn:li:corpuser:b2fd91.patrick1@example.com",
+          "urn:li:corpuser:b2fd91.alex@example.com"
+        ]
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:dbt,b2fd91.ORDER_ENTRY_DB.analytics.order_details,PROD)",
+        "name": "order_details (dbt)",
+        "type": "DATASET",
+        "hops": 1,
+        "score": 1.5,
+        "owners": [
+          "urn:li:corpuser:b2fd91.marty@example.com",
+          "urn:li:corpuser:b2fd91.sam@example.com"
+        ]
+      },
+      {
+        "urn": "urn:li:dashboard:(looker,b2fd91.dashboards.53)",
+        "name": "Order Entry Dashboard (Looker)",
+        "type": "DASHBOARD",
+        "hops": 5,
+        "score": 1.5,
+        "owners": [
+          "urn:li:corpuser:b2fd91.brock1@example.com"
+        ]
+      },
+      {
+        "urn": "urn:li:dataProduct:b2fd91.e0e95662-34bb-42fc-9dcc-29002bbbfeda",
+        "name": "Order Entry Analytics (Data Product)",
+        "type": "DATA_PRODUCT",
+        "hops": 1,
+        "score": 1.0,
+        "owners": []
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:dbt,b2fd91.ORDER_ENTRY_DB.analytics.order_history,PROD)",
+        "name": "order_history (dbt)",
+        "type": "DATASET",
+        "hops": 2,
+        "score": 1.0,
+        "owners": [
+          "urn:li:corpuser:b2fd91.kirk@example.com"
+        ]
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:powerbi,b2fd91.datahub_order_entries.ORDER_DETAILS,PROD)",
+        "name": "ORDER_DETAILS (Power BI)",
+        "type": "DATASET",
+        "hops": 2,
+        "score": 1.0,
+        "owners": [
+          "urn:li:corpuser:b2fd91.kirk@example.com"
+        ]
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:powerbi,b2fd91.datahub_order_entries.Customer_Analytics_Measures,PROD)",
+        "name": "Customer Analytics Measures (Power BI)",
+        "type": "DATASET",
+        "hops": 2,
+        "score": 1.0,
+        "owners": [
+          "urn:li:corpuser:b2fd91.EMP006"
+        ]
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:powerbi,b2fd91.datahub_order_entries.Essential_KPI_Measures,PROD)",
+        "name": "Essential KPI Measures (Power BI)",
+        "type": "DATASET",
+        "hops": 2,
+        "score": 1.0,
+        "owners": [
+          "urn:li:corpuser:b2fd91.bryan@example.com"
+        ]
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:powerbi,b2fd91.datahub_order_entries.Geographic_Measures,PROD)",
+        "name": "Geographic Measures (Power BI)",
+        "type": "DATASET",
+        "hops": 2,
+        "score": 1.0,
+        "owners": [
+          "urn:li:corpuser:b2fd91.alex@example.com"
+        ]
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:powerbi,b2fd91.datahub_order_entries.Product_Perfromance_Measures,PROD)",
+        "name": "Product Perfromance Measures (Power BI)",
+        "type": "DATASET",
+        "hops": 2,
+        "score": 1.0,
+        "owners": [
+          "urn:li:corpuser:b2fd91.jonny1@example.com"
+        ]
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:powerbi,b2fd91.datahub_order_entries.Time_Inteligence_Measures,PROD)",
+        "name": "Time Inteligence Measures (Power BI)",
+        "type": "DATASET",
+        "hops": 2,
+        "score": 1.0,
+        "owners": [
+          "urn:li:corpuser:b2fd91.jonny1@example.com"
+        ]
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:looker,b2fd91.order-entry.explore.order_details,PROD)",
+        "name": "Order Details (Looker Explore)",
+        "type": "DATASET",
+        "hops": 3,
+        "score": 0.75,
+        "owners": [
+          "urn:li:corpuser:b2fd91.bryan@example.com"
+        ]
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:tableau,b2fd91.b980a8c5-28eb-119e-f6ca-4da32732e5be,PROD)",
+        "name": "Promotions (Tableau)",
+        "type": "DATASET",
+        "hops": 3,
+        "score": 0.75,
+        "owners": [
+          "urn:li:corpuser:b2fd91.brock1@example.com"
+        ]
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:tableau,b2fd91.c067553a-127e-a871-14a0-5f32cb032c78,PROD)",
+        "name": "Order Mode (Tableau)",
+        "type": "DATASET",
+        "hops": 3,
+        "score": 0.75,
+        "owners": [
+          "urn:li:corpuser:b2fd91.brock1@example.com"
+        ]
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:tableau,b2fd91.f8fb6a0b-7be6-690b-cc45-3c6e0fd2bcde,PROD)",
+        "name": "Orders By Day (Tableau)",
+        "type": "DATASET",
+        "hops": 3,
+        "score": 0.75,
+        "owners": [
+          "urn:li:corpuser:b2fd91.brock1@example.com"
+        ]
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:tableau,b2fd91.fadbf744-48be-0929-a47c-5786327a3343,PROD)",
+        "name": "Top Product Category (Tableau)",
+        "type": "DATASET",
+        "hops": 3,
+        "score": 0.75,
+        "owners": [
+          "urn:li:corpuser:b2fd91.brock1@example.com"
+        ]
+      }
+    ],
+    "total_score": 17.0,
+    "owners_to_notify": [
+      "urn:li:corpuser:b2fd91.EMP006",
+      "urn:li:corpuser:b2fd91.alex@example.com",
+      "urn:li:corpuser:b2fd91.brock1@example.com",
+      "urn:li:corpuser:b2fd91.bryan@example.com",
+      "urn:li:corpuser:b2fd91.jonny1@example.com",
+      "urn:li:corpuser:b2fd91.kirk@example.com",
+      "urn:li:corpuser:b2fd91.marty@example.com",
+      "urn:li:corpuser:b2fd91.michael@example.com",
+      "urn:li:corpuser:b2fd91.patrick1@example.com",
+      "urn:li:corpuser:b2fd91.sam@example.com"
+    ]
+  },
+  "hypotheses": [
+    {
+      "cause_type": "data_source_issue",
+      "statement": "The data ingestion pipeline (spark data job) contains a logic error that is introducing NULLs into the customer_id column during the transfer from S3 to Snowflake.",
+      "confidence": 0.9,
+      "evidence": [
+        "The source S3 dataset (urn:li:dataset:(urn:li:dataPlatform:s3,b2fd91.demo-data-bucket/order_entry/orders,PROD)) defines customer_id as nullable=false, but the target Snowflake dataset (urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)) has nullable=true and currently contains NULLs.",
+        "The data job (urn:li:dataJob:(urn:li:dataFlow:(spark,b2fd91.import_table_orders_to_snowflake,b2fd91.default),b2fd91.import_table_orders_to_snowflake)) responsible for moving data from S3 to Snowflake is the likely location of the logic error, such as a join dropping records or a transformation filtering data incorrectly, as indicated by the investigation hints."
+      ],
+      "evidence_urns": [
+        "urn:li:dataset:(urn:li:dataPlatform:s3,b2fd91.demo-data-bucket/order_entry/orders,PROD)",
+        "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+        "urn:li:dataJob:(urn:li:dataFlow:(spark,b2fd91.import_table_orders_to_snowflake,b2fd91.default),b2fd91.import_table_orders_to_snowflake)"
+      ]
+    }
+  ],
+  "plan": {
+    "mutations": [
+      {
+        "tool": "add_tags",
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+        "args": {
+          "entity_urns": [
+            "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)"
+          ],
+          "tag_urns": [
+            "urn:li:tag:hindsight-degraded"
+          ]
+        },
+        "rationale": "Tagging degraded snowflake orders dataset with hindsight-degraded."
+      },
+      {
+        "tool": "update_description",
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+        "args": {
+          "description": "## Incident Report - 2026-08-08 03:00 UTC\nSymptom: customer_id column contains NULL values.\nStatus: Investigation ongoing. Downstream data quality impacted.",
+          "operation": "replace",
+          "entity_urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)"
+        },
+        "rationale": "Adding incident warning to the snowflake orders dataset description."
+      },
+      {
+        "tool": "add_tags",
+        "urn": "urn:li:dashboard:(powerbi,b2fd91.reports.66666666-7777-8888-9999-000000000000)",
+        "args": {
+          "tag_urns": [
+            "urn:li:tag:hindsight-impacted"
+          ],
+          "entity_urns": [
+            "urn:li:dashboard:(powerbi,b2fd91.reports.66666666-7777-8888-9999-000000000000)",
+            "urn:li:dataset:(urn:li:dataPlatform:dbt,b2fd91.ORDER_ENTRY_DB.analytics.order_details,PROD)"
+          ]
+        },
+        "rationale": "Tagging high-impact downstream assets (Power BI report and dbt order_details) as impacted."
+      }
+    ],
+    "postmortem_title": "Investigation: NULL values in customer_id for order_entry_db.orders"
+  },
+  "committed": [
+    {
+      "tool": "add_tags",
+      "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+      "args": {
+        "entity_urns": [
+          "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)"
+        ],
+        "tag_urns": [
+          "urn:li:tag:hindsight-degraded"
+        ]
+      },
+      "rationale": "Tagging degraded snowflake orders dataset with hindsight-degraded.",
+      "via": "mcp",
+      "ok": true,
+      "error": null
+    },
+    {
+      "tool": "update_description",
+      "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+      "args": {
+        "description": "## Incident Report - 2026-08-08 03:00 UTC\nSymptom: customer_id column contains NULL values.\nStatus: Investigation ongoing. Downstream data quality impacted.",
+        "operation": "replace",
+        "entity_urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)"
+      },
+      "rationale": "Adding incident warning to the snowflake orders dataset description.",
+      "via": "mcp",
+      "ok": true,
+      "error": null
+    },
+    {
+      "tool": "add_tags",
+      "urn": "urn:li:dashboard:(powerbi,b2fd91.reports.66666666-7777-8888-9999-000000000000)",
+      "args": {
+        "tag_urns": [
+          "urn:li:tag:hindsight-impacted"
+        ],
+        "entity_urns": [
+          "urn:li:dashboard:(powerbi,b2fd91.reports.66666666-7777-8888-9999-000000000000)",
+          "urn:li:dataset:(urn:li:dataPlatform:dbt,b2fd91.ORDER_ENTRY_DB.analytics.order_details,PROD)"
+        ]
+      },
+      "rationale": "Tagging high-impact downstream assets (Power BI report and dbt order_details) as impacted.",
+      "via": "mcp",
+      "ok": true,
+      "error": null
+    }
+  ],
+  "postmortem_ref": "urn:li:document:shared-06a84905-fad0-42f5-9634-8ad1e9d8f9ef",
+  "tool_calls": 14,
+  "status": "done"
+}

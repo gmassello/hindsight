@@ -262,4 +262,4 @@ Then report what changed: the mutations applied, where the audit trail is, and t
 
 ## Reference Implementation
 
-[Hindsight](https://github.com/gmassello/hindsight) implements this workflow as a deterministic phase state machine with an LLM inside each phase, plus a web UI and an audit log. Its `examples/` directory holds full captured runs against a live DataHub, including a cold-versus-warm comparison where memory cut the same investigation from 29 DataHub calls to 17.
+[Hindsight](https://github.com/gmassello/hindsight) implements this workflow as a deterministic phase state machine with an LLM inside each phase, plus a web UI and an audit log. Its `examples/` directory holds full captured runs against a live DataHub, including a cold-versus-warm comparison where memory cut the same investigation from 20 DataHub calls to 15.

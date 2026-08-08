@@ -17,11 +17,12 @@ Every number in this README comes from a file in this repository.
 
 | Claim | Evidence |
 | --- | --- |
-| 13 MCP tools, read **and** mutation, multi-hop lineage in both directions | [`01-schema-drift/timeline.md`](examples/01-schema-drift/timeline.md) — 16 tool calls on a warm run, 20 consumers |
-| Blast radius ranked by a deterministic formula, with the owner list to page | [`01-schema-drift/blast-radius.md`](examples/01-schema-drift/blast-radius.md) — total score 32.85, 14 deduplicated owners |
-| Memory pays for itself: the same incident costs **29 tool calls cold and 17 warm** | [`02-cold-vs-warm/`](examples/02-cold-vs-warm/) |
+| 13 MCP tools, read **and** mutation, multi-hop lineage in both directions | [`02-cold-vs-warm/cold/timeline.md`](examples/02-cold-vs-warm/cold/timeline.md) — 20 tool calls on a cold run, 29 consumers |
+| Blast radius ranked by a deterministic formula, with the owner list to page | [`02-cold-vs-warm/cold/blast-radius.md`](examples/02-cold-vs-warm/cold/blast-radius.md) — total score 30.08, 14 deduplicated owners |
+| Memory pays for itself: the same incident costs **20 tool calls cold and 15 warm** | [`02-cold-vs-warm/`](examples/02-cold-vs-warm/) |
 | Five runs against a live catalog, four of them written by `--report` and the fifth transcribed by hand | [`examples/`](examples/) |
-| The procedure runs with **no Hindsight code in the loop** — same URN, converging root cause, the same 14 owners | [`04-skill-portability/`](examples/04-skill-portability/) |
+| The procedure runs with **no Hindsight code in the loop** — same URN, converging root cause, the same 14 owner URNs | [`04-skill-portability/`](examples/04-skill-portability/) |
+| Every captured run ships its raw event stream, replayable with **no DataHub and no API key** | `hindsight replay examples/01-schema-drift` over [`events.json`](examples/01-schema-drift/events.json) |
 | The skill is proposed upstream to the official DataHub skills repo | [datahub-project/datahub-skills#110](https://github.com/datahub-project/datahub-skills/pull/110) |
 
 ## The closed loop
@@ -99,6 +100,14 @@ The CLI streams the timeline, renders the mutations as a dry-run diff, and appli
 
 Run it twice: the second run's `recall` phase finds the postmortem the first run wrote and starts from its conclusions.
 
+### See a run without installing anything
+
+`--report <dir>` writes the raw event stream next to the markdown artifacts, and `replay` reprints it — no DataHub, no API key, no `.env`:
+
+```bash
+cd backend && .venv/bin/hindsight replay ../examples/02-cold-vs-warm/cold
+```
+
 ### Web UI
 
 ```bash
@@ -152,8 +161,8 @@ Backend on `http://localhost:8000`, frontend on `http://localhost:5173`. The bac
 
 `scenarios/scenarios.yaml` defines three reproducible scenarios; `examples/` holds five captured runs across four directories, each with its input, timeline, blast radius, postmortem and audit log. Four were written by `hindsight investigate ... --report <dir>`; the fifth is a run of the Skill alone, transcribed by hand:
 
-1. [`01-schema-drift`](examples/01-schema-drift/) — a simulated upstream migration (`scenarios/break_schema.py`) drops the `customer_id` NOT NULL constraint; the agent traces the nulls to the Postgres ancestor a previous run had already tagged `hindsight-degraded`, tags the degraded and impacted assets, and saves the postmortem.
-2. [`02-cold-vs-warm`](examples/02-cold-vs-warm/) ★ — the same incident twice. The cold run investigates from scratch (**29 DataHub tool calls**); the warm run's `recall` phase retrieves the postmortem the cold run just wrote and goes straight to the suspect ancestor (**17 calls, 41% fewer**). The two timelines sit side by side.
+1. [`01-schema-drift`](examples/01-schema-drift/) — a simulated upstream migration (`scenarios/break_schema.py`) drops the `customer_id` NOT NULL constraint; with six seeded postmortems in memory, `recall` points at the Spark ingestion job and the agent converges there in **14 tool calls**, tags the degraded and impacted assets, and saves the postmortem.
+2. [`02-cold-vs-warm`](examples/02-cold-vs-warm/) ★ — the same incident twice. The cold run investigates from scratch (**20 DataHub tool calls**, 29 consumers); the warm run's `recall` phase retrieves the postmortem the cold run just wrote and goes straight to the suspect ancestor (**15 calls, 25% fewer**). The two timelines sit side by side.
 3. [`03-orphaned-asset`](examples/03-orphaned-asset/) — a stale table nobody owns and nobody consumes: besides the incident actions, the agent assigns `add_owners` to close the governance gap.
 4. [`04-skill-portability`](examples/04-skill-portability/) — scenario 1 re-run by the Skill alone, with no Hindsight code in the loop. See below.
 
@@ -165,7 +174,7 @@ Backend on `http://localhost:8000`, frontend on `http://localhost:5173`. The bac
 
 It is written against the same DataHub MCP tool names Hindsight uses, with `datahub` CLI fallbacks, and follows the conventions of [`datahub-project/datahub-skills`](https://github.com/datahub-project/datahub-skills).
 
-It has been executed end to end: [`examples/04-skill-portability`](examples/04-skill-portability/) is the captured run of an agent following the skill alone, reaching **the same fourteen owners** as scenario 1 and naming that scenario's conclusion as its own second hypothesis. It was a warm run; the caveats and the three defects the verification surfaced are documented there.
+It has been executed end to end: [`examples/04-skill-portability`](examples/04-skill-portability/) is the captured run of an agent following the skill alone, reaching **the same fourteen owner URNs** — set for set — as the cold run of the same incident in scenario 2. It was a warm run; the caveats and the three defects the verification surfaced are documented there.
 
 ## Notes from the build
 
@@ -176,12 +185,15 @@ Things that cost hours against a real DataHub and a real model, written down so 
 - **`save_document` needs a `document_type` from a server-defined enum** (`Analysis`, `Note`, …). Read it from the live schema; a guessed value is a rejected write — `learn` reads the enum at runtime.
 - **The MCP server hides the document tools entirely when the catalog has zero documents.** `recall` has to treat their absence as a cold start rather than an error, or the very first run against a fresh install fails on the phase that is supposed to find nothing.
 - **`grep_documents` takes a `urns` argument** — it narrows an existing result set, it does not search the catalog. And `get_lineage_paths_between` takes `source_urn`/`target_urn`, not `upstream_urn`/`downstream_urn`. Both were guessed once and both cost a wasted turn — see [`examples/04-skill-portability`](examples/04-skill-portability/).
+- **`datahub datapack load` returns before the lineage graph exists.** The ingestion reports success in under a second, but the graph index fills in asynchronously for minutes afterwards: `get_lineage` on the same URN returned a handful of consumers and then 37. A run started too early produces a real-looking investigation with a blast radius that is quietly wrong. Poll `searchAcrossLineage` until the count stops growing before capturing anything. (The `--restore-indices` job in the 1.7.0 quickstart is not the fix — it dies on an unresolved `DATAHUB_SYSTEM_CLIENT_SECRET`. Waiting is.)
 - **An agent that summarises its own postmortem quietly breaks the memory loop.** `grep_documents` matches literal text, so a prose summary of a blast radius is a document the next investigation cannot use. The postmortem has to carry every row, every owner URN and the largest hop count actually observed. This one was found by running the Skill end to end — see [`examples/04-skill-portability`](examples/04-skill-portability/).
 
 ## Honest limits
 
 - **The phase prompts are not covered by tests.** Everything listed under [Tests](#tests) is; the prompts themselves are verified only by the captured runs in `examples/`.
-- **Every number in `examples/` comes from a single run.** The cold-vs-warm delta (29 → 17 tool calls) is one pair against one catalog, not a repeated measurement with a variance.
+- **Every number in `examples/` comes from a single run.** The cold-vs-warm delta (20 → 15 tool calls) is one pair against one catalog, not a repeated measurement with a variance.
+- **Memory buys speed, and in this pair it also cost coverage.** The warm run reached the same conclusion in fewer calls, but its blast radius swept 6 consumers where the cold run swept 29: steered straight at the suspect, it explored less. Fewer calls is not free.
+- **The `propose` phase is not deterministic.** Running scenario 3 twice on the same catalog produced `add_owners` once and not the other time, on an asset that demonstrably had no owner. The captured run is the one that proposed it; the run that did not is a real failure mode, not an artefact.
 - **Hindsight does not detect incidents.** It receives an alert and investigates it. Monitoring is one of the six things ruled out on purpose in [`docs/design.md`](docs/design.md) §3.
 - **The API keeps investigations in an in-memory dict**, with no auth and no persistence. Restarting `hindsight serve` loses them. This is a demo, not a SaaS.
 - **`set_domains` has never fired.** It is implemented, but the prompt forbids inventing a domain URN and no captured run retrieved one — domain URNs in this catalog are UUIDs. Scenario 3 therefore ships demonstrating the owner half of the governance gap.
@@ -204,7 +216,7 @@ backend/src/hindsight/
 ├── memory/postmortem.py    # postmortem markdown rendering
 ├── safety/                 # dry-run rendering + JSONL audit log
 ├── api/                    # FastAPI + SSE
-└── cli.py                  # `hindsight investigate` / `hindsight serve`
+└── cli.py                  # `hindsight investigate` / `replay` / `serve`
 
 frontend/src/
 ├── useInvestigation.ts     # all state + SSE lifecycle in one hook

@@ -1,0 +1,161 @@
+{
+  "id": "94310b0b",
+  "input_text": "order_history in the analytics schema is stale since yesterday; the catalog shows no owner for it, the data platform group (b2fd91.ORG_DATA_PLATFORM) should probably be assigned as owner",
+  "started_at": "2026-08-08",
+  "incident": {
+    "mentioned_assets": [
+      "analytics.order_history"
+    ],
+    "symptom_type": "freshness",
+    "symptom_description": "The order_history table in the analytics schema has not been updated since yesterday.",
+    "detected_at": "2026-08-07"
+  },
+  "resolution": {
+    "resolved_asset": {
+      "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)",
+      "name": "ORDER_HISTORY (Snowflake Table)",
+      "type": "Snowflake Table",
+      "owners": [],
+      "domain": "urn:li:domain:b2fd91.d4f24004-fb54-4e3c-8dea-2b7e209230b0"
+    },
+    "alternatives": [
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:dbt,b2fd91.ORDER_ENTRY_DB.analytics.order_history,PROD)",
+        "name": "order_history (dbt model)",
+        "type": "dbt model",
+        "owners": [],
+        "domain": ""
+      }
+    ],
+    "ambiguity_note": "There were two potential matches: the Snowflake table (the physical asset) and the dbt model (the definition). I have selected the Snowflake table as the primary asset because it represents the actual data that is stale in production. The dbt model is included as an alternative. Both assets lack an explicit owner field in their catalog entries, confirming the report that no owner is assigned, though the Snowflake table contains additional information regarding its staleness in its editable properties."
+  },
+  "recall": {
+    "prior_incidents": [
+      {
+        "title": "Staleness of order_history dataset due to upstream orders table failure",
+        "reference": "urn:li:document:shared-9cf67949-2034-4b31-a135-d05e814a3709",
+        "similarity": "high",
+        "prior_resolution": "Resolved after upstream orders table degradation was addressed.",
+        "summary": "Staleness of order_history due to upstream orders table failure."
+      }
+    ],
+    "investigation_hints": [
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+        "cause_type": "upstream_incident",
+        "reason": "Previous similar incidents for this asset were caused by upstream degradation in the 'orders' table. Investigate if the orders table is currently degraded."
+      }
+    ]
+  },
+  "blast_radius": {
+    "impacted": [],
+    "total_score": 0.0,
+    "owners_to_notify": []
+  },
+  "hypotheses": [
+    {
+      "cause_type": "upstream_incident",
+      "statement": "The freshness issue in ORDER_HISTORY is caused by a failure in the upstream ORDERS table, which is currently experiencing an active incident ('hindsight-degraded') involving data quality problems that are propagating through the pipeline.",
+      "confidence": 0.9,
+      "evidence": [
+        "The ORDERS source table (urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)) is currently tagged as 'hindsight-degraded', indicating an active incident. Multiple recent documents (e.g., 2026-08-08 incident report) confirm ongoing data quality issues (NULLs in customer_id) in this table, which likely triggered the pipeline failure leading to the freshness issue in ORDER_HISTORY."
+      ],
+      "evidence_urns": [
+        "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)"
+      ]
+    }
+  ],
+  "plan": {
+    "mutations": [
+      {
+        "tool": "add_tags",
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)",
+        "args": {
+          "entity_urns": [
+            "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)"
+          ],
+          "tag_urns": [
+            "urn:li:tag:hindsight-degraded"
+          ]
+        },
+        "rationale": "Marking stale order_history table as degraded due to freshness incident."
+      },
+      {
+        "tool": "update_description",
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)",
+        "args": {
+          "description": "[2026-08-07] WARNING: This asset is currently experiencing freshness issues. Data is stale.",
+          "operation": "append",
+          "entity_urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)"
+        },
+        "rationale": "Adding warning to description regarding freshness incident."
+      },
+      {
+        "tool": "add_owners",
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)",
+        "args": {
+          "owner_urns": [
+            "urn:li:corpGroup:b2fd91.ORG_DATA_PLATFORM"
+          ],
+          "ownership_type": "TECHNICAL_OWNER",
+          "entity_urns": [
+            "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)"
+          ]
+        },
+        "rationale": "Assigning missing ownership to the analytics order_history table as requested."
+      }
+    ],
+    "postmortem_title": "Staleness Incident in analytics.order_history (2026-08-07)"
+  },
+  "committed": [
+    {
+      "tool": "add_tags",
+      "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)",
+      "args": {
+        "entity_urns": [
+          "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)"
+        ],
+        "tag_urns": [
+          "urn:li:tag:hindsight-degraded"
+        ]
+      },
+      "rationale": "Marking stale order_history table as degraded due to freshness incident.",
+      "via": "mcp",
+      "ok": true,
+      "error": null
+    },
+    {
+      "tool": "update_description",
+      "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)",
+      "args": {
+        "description": "[2026-08-07] WARNING: This asset is currently experiencing freshness issues. Data is stale.",
+        "operation": "append",
+        "entity_urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)"
+      },
+      "rationale": "Adding warning to description regarding freshness incident.",
+      "via": "mcp",
+      "ok": true,
+      "error": null
+    },
+    {
+      "tool": "add_owners",
+      "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)",
+      "args": {
+        "owner_urns": [
+          "urn:li:corpGroup:b2fd91.ORG_DATA_PLATFORM"
+        ],
+        "ownership_type": "TECHNICAL_OWNER",
+        "entity_urns": [
+          "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)"
+        ]
+      },
+      "rationale": "Assigning missing ownership to the analytics order_history table as requested.",
+      "via": "mcp",
+      "ok": true,
+      "error": null
+    }
+  ],
+  "postmortem_ref": "urn:li:document:shared-52dd787a-5fe5-49ec-b32d-99391ef9176f",
+  "tool_calls": 17,
+  "status": "done"
+}

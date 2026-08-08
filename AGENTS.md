@@ -16,6 +16,7 @@ uv sync                                  # create .venv and install deps
 .venv/bin/pytest                         # run all tests
 .venv/bin/pytest tests/test_lineage.py -k test_impact_score_formula   # single test
 .venv/bin/hindsight investigate "<incident text>" [--auto-approve]    # full agent run (CLI)
+.venv/bin/hindsight replay ../examples/02-cold-vs-warm/cold           # reprint a captured run offline
 .venv/bin/hindsight serve                # FastAPI on :8000
 ```
 

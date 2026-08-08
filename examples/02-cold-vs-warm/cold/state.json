@@ -1,0 +1,486 @@
+{
+  "id": "013abb17",
+  "input_text": "orders in order_entry_db is showing NULL values in customer_id since 03:00 UTC today, downstream order reports look wrong",
+  "started_at": "2026-08-08",
+  "incident": {
+    "mentioned_assets": [
+      "orders",
+      "order_entry_db",
+      "order reports"
+    ],
+    "symptom_type": "nulls",
+    "symptom_description": "The orders table in order_entry_db is showing NULL values in the customer_id column.",
+    "detected_at": "2026-08-08 03:00 UTC"
+  },
+  "resolution": {
+    "resolved_asset": {
+      "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+      "name": "orders (snowflake)",
+      "type": "",
+      "owners": [
+        "urn:li:corpGroup:b2fd91.ORG_DATA_PLATFORM",
+        "urn:li:corpuser:b2fd91.EMP006"
+      ],
+      "domain": ""
+    },
+    "alternatives": [
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:dbt,b2fd91.order_entry_db.order_entry.orders,PROD)",
+        "name": "orders (dbt)",
+        "type": "",
+        "owners": [],
+        "domain": ""
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataset:(urn:li:dataPlatform:postgres,b2fd91.order_entry_db.order_entry.orders,PROD),orders,PROD)",
+        "name": "orders (postgres)",
+        "type": "",
+        "owners": [],
+        "domain": ""
+      }
+    ],
+    "ambiguity_note": "Several versions of the 'orders' table exist (dbt, postgres, and snowflake). I have selected the snowflake version as it is the primary production table utilized in the Data Product 'Order Entry Analytics', has the highest interaction, and its metadata includes a note about the exact schema change (dropping NOT NULL) that caused the incident."
+  },
+  "recall": {
+    "prior_incidents": [],
+    "investigation_hints": []
+  },
+  "blast_radius": {
+    "impacted": [
+      {
+        "urn": "urn:li:dashboard:(powerbi,b2fd91.reports.66666666-7777-8888-9999-000000000000)",
+        "name": "datahub_order_entries",
+        "type": "DASHBOARD",
+        "hops": 3,
+        "score": 2.25,
+        "owners": [
+          "urn:li:corpuser:b2fd91.sam@example.com",
+          "urn:li:corpuser:b2fd91.michael@example.com",
+          "urn:li:corpuser:b2fd91.patrick1@example.com",
+          "urn:li:corpuser:b2fd91.alex@example.com"
+        ]
+      },
+      {
+        "urn": "urn:li:dashboard:(looker,b2fd91.dashboards.53)",
+        "name": "Order Entry Dashboard",
+        "type": "DASHBOARD",
+        "hops": 3,
+        "score": 2.25,
+        "owners": [
+          "urn:li:corpuser:b2fd91.brock1@example.com"
+        ]
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:dbt,b2fd91.ORDER_ENTRY_DB.analytics.order_details,PROD)",
+        "name": "order_details",
+        "type": "DATASET",
+        "hops": 1,
+        "score": 1.5,
+        "owners": [
+          "urn:li:corpGroup:b2fd91.ORG_DATA_PLATFORM",
+          "urn:li:corpuser:b2fd91.EMP006",
+          "urn:li:corpuser:b2fd91.brock1@example.com",
+          "urn:li:corpuser:b2fd91.bryan@example.com",
+          "urn:li:corpuser:b2fd91.jonny1@example.com",
+          "urn:li:corpuser:b2fd91.jonny2@example.com",
+          "urn:li:corpuser:b2fd91.kirk@example.com",
+          "urn:li:corpuser:b2fd91.marty@example.com",
+          "urn:li:corpuser:b2fd91.sam@example.com"
+        ]
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:dbt,b2fd91.order_entry_db.order_entry.orders,PROD)",
+        "name": "orders",
+        "type": "DATASET",
+        "hops": 1,
+        "score": 1.5,
+        "owners": [
+          "urn:li:corpGroup:b2fd91.ORG_DATA_PLATFORM",
+          "urn:li:corpuser:b2fd91.EMP006"
+        ]
+      },
+      {
+        "urn": "urn:li:chart:(tableau,b2fd91.89f38fd7-058d-b66a-6db0-4f85f105468a)",
+        "name": "Orders By Month",
+        "type": "CHART",
+        "hops": 4,
+        "score": 1.2,
+        "owners": [
+          "urn:li:corpuser:b2fd91.brock1@example.com"
+        ]
+      },
+      {
+        "urn": "urn:li:chart:(tableau,b2fd91.b8c660a8-10ea-e32a-b823-fa655e1c2f43)",
+        "name": "Popular Products Categories",
+        "type": "CHART",
+        "hops": 4,
+        "score": 1.2,
+        "owners": [
+          "urn:li:corpuser:b2fd91.brock1@example.com"
+        ]
+      },
+      {
+        "urn": "urn:li:chart:(tableau,b2fd91.e051d978-989f-a329-5458-e01721b05570)",
+        "name": "Promotions",
+        "type": "CHART",
+        "hops": 4,
+        "score": 1.2,
+        "owners": [
+          "urn:li:corpuser:b2fd91.brock1@example.com"
+        ]
+      },
+      {
+        "urn": "urn:li:chart:(tableau,b2fd91.e36d7772-ac4d-4fd0-a893-aec88f3aa13e)",
+        "name": "Order Mode",
+        "type": "CHART",
+        "hops": 4,
+        "score": 1.2,
+        "owners": [
+          "urn:li:corpuser:b2fd91.brock1@example.com"
+        ]
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_details,PROD)",
+        "name": "ORDER_DETAILS",
+        "type": "DATASET",
+        "hops": 2,
+        "score": 1.0,
+        "owners": [
+          "urn:li:corpGroup:b2fd91.1e0398a3-113f-475e-b6fc-32ab72a634d2",
+          "urn:li:corpuser:b2fd91.brock1@example.com",
+          "urn:li:corpuser:b2fd91.jonny1@example.com"
+        ]
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)",
+        "name": "ORDER_HISTORY",
+        "type": "DATASET",
+        "hops": 2,
+        "score": 1.0,
+        "owners": [
+          "urn:li:corpuser:b2fd91.sam@example.com"
+        ]
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:powerbi,b2fd91.datahub_order_entries.Customer_Analytics_Measures,PROD)",
+        "name": "Customer Analytics Measures",
+        "type": "DATASET",
+        "hops": 2,
+        "score": 1.0,
+        "owners": [
+          "urn:li:corpuser:b2fd91.EMP006"
+        ]
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:powerbi,b2fd91.datahub_order_entries.Essential_KPI_Measures,PROD)",
+        "name": "Essential KPI Measures",
+        "type": "DATASET",
+        "hops": 2,
+        "score": 1.0,
+        "owners": [
+          "urn:li:corpuser:b2fd91.bryan@example.com"
+        ]
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:powerbi,b2fd91.datahub_order_entries.Geographic_Measures,PROD)",
+        "name": "Geographic Measures",
+        "type": "DATASET",
+        "hops": 2,
+        "score": 1.0,
+        "owners": [
+          "urn:li:corpuser:b2fd91.alex@example.com"
+        ]
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:powerbi,b2fd91.datahub_order_entries.Product_Perfromance_Measures,PROD)",
+        "name": "Product Perfromance Measures",
+        "type": "DATASET",
+        "hops": 2,
+        "score": 1.0,
+        "owners": [
+          "urn:li:corpuser:b2fd91.jonny1@example.com"
+        ]
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:powerbi,b2fd91.datahub_order_entries.Time_Inteligence_Measures,PROD)",
+        "name": "Time Inteligence Measures",
+        "type": "DATASET",
+        "hops": 2,
+        "score": 1.0,
+        "owners": [
+          "urn:li:corpuser:b2fd91.jonny1@example.com"
+        ]
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:looker,b2fd91.order-entry-looker.view.order_details,PROD)",
+        "name": "order_details",
+        "type": "DATASET",
+        "hops": 2,
+        "score": 1.0,
+        "owners": [
+          "urn:li:corpuser:b2fd91.marty@example.com",
+          "urn:li:corpuser:b2fd91.EMP006",
+          "urn:li:corpGroup:b2fd91.ORG_DATA_PLATFORM",
+          "urn:li:corpuser:b2fd91.alex@example.com"
+        ]
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:dbt,b2fd91.ORDER_ENTRY_DB.analytics.order_history,PROD)",
+        "name": "order_history",
+        "type": "DATASET",
+        "hops": 2,
+        "score": 1.0,
+        "owners": [
+          "urn:li:corpuser:b2fd91.kirk@example.com"
+        ]
+      },
+      {
+        "urn": "urn:li:chart:(looker,b2fd91.dashboard_elements.221)",
+        "name": "Popular Products",
+        "type": "CHART",
+        "hops": 4,
+        "score": 0.8,
+        "owners": []
+      },
+      {
+        "urn": "urn:li:chart:(looker,b2fd91.dashboard_elements.222)",
+        "name": "Promotions",
+        "type": "CHART",
+        "hops": 4,
+        "score": 0.8,
+        "owners": []
+      },
+      {
+        "urn": "urn:li:dataProduct:b2fd91.e0e95662-34bb-42fc-9dcc-29002bbbfeda",
+        "name": "Order Entry Analytics",
+        "type": "DATA_PRODUCT",
+        "hops": 1,
+        "score": 0.75,
+        "owners": [
+          "urn:li:corpuser:b2fd91.EMP006"
+        ]
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:looker,b2fd91.order-entry.explore.order_details,PROD)",
+        "name": "Order Details",
+        "type": "DATASET",
+        "hops": 3,
+        "score": 0.75,
+        "owners": [
+          "urn:li:corpGroup:b2fd91.ORG_DATA_PLATFORM",
+          "urn:li:corpGroup:b2fd91.ORG_BACKEND_ENG",
+          "urn:li:corpuser:b2fd91.EMP006"
+        ]
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:tableau,b2fd91.b980a8c5-28eb-119e-f6ca-4da32732e5be,PROD)",
+        "name": "Promotions",
+        "type": "DATASET",
+        "hops": 3,
+        "score": 0.75,
+        "owners": [
+          "urn:li:corpuser:b2fd91.brock1@example.com"
+        ]
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:tableau,b2fd91.c067553a-127e-a871-14a0-5f32cb032c78,PROD)",
+        "name": "Order Mode",
+        "type": "DATASET",
+        "hops": 3,
+        "score": 0.75,
+        "owners": [
+          "urn:li:corpuser:b2fd91.brock1@example.com"
+        ]
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:tableau,b2fd91.f8fb6a0b-7be6-690b-cc45-3c6e0fd2bcde,PROD)",
+        "name": "Orders By Day",
+        "type": "DATASET",
+        "hops": 3,
+        "score": 0.75,
+        "owners": [
+          "urn:li:corpuser:b2fd91.brock1@example.com"
+        ]
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:tableau,b2fd91.fadbf744-48be-0929-a47c-5786327a3343,PROD)",
+        "name": "Top Product Category",
+        "type": "DATASET",
+        "hops": 3,
+        "score": 0.75,
+        "owners": [
+          "urn:li:corpuser:b2fd91.brock1@example.com"
+        ]
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:tableau,b2fd91.37fcfb15-34ae-973a-5ae3-cf63691d48e3,PROD)",
+        "name": "Custom SQL Query",
+        "type": "DATASET",
+        "hops": 2,
+        "score": 0.67,
+        "owners": []
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:tableau,b2fd91.4a3af1dd-fd0c-7077-d5fd-aa2fdf87cb23,PROD)",
+        "name": "Custom SQL Query",
+        "type": "DATASET",
+        "hops": 2,
+        "score": 0.67,
+        "owners": []
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:tableau,b2fd91.8bfe7483-1c9a-a0e1-ec84-57207dd37a15,PROD)",
+        "name": "Custom SQL Query",
+        "type": "DATASET",
+        "hops": 2,
+        "score": 0.67,
+        "owners": []
+      },
+      {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:tableau,b2fd91.f32082e5-06b8-f46e-9047-4611fffe66b0,PROD)",
+        "name": "Custom SQL Query",
+        "type": "DATASET",
+        "hops": 2,
+        "score": 0.67,
+        "owners": []
+      }
+    ],
+    "total_score": 30.08,
+    "owners_to_notify": [
+      "urn:li:corpGroup:b2fd91.1e0398a3-113f-475e-b6fc-32ab72a634d2",
+      "urn:li:corpGroup:b2fd91.ORG_BACKEND_ENG",
+      "urn:li:corpGroup:b2fd91.ORG_DATA_PLATFORM",
+      "urn:li:corpuser:b2fd91.EMP006",
+      "urn:li:corpuser:b2fd91.alex@example.com",
+      "urn:li:corpuser:b2fd91.brock1@example.com",
+      "urn:li:corpuser:b2fd91.bryan@example.com",
+      "urn:li:corpuser:b2fd91.jonny1@example.com",
+      "urn:li:corpuser:b2fd91.jonny2@example.com",
+      "urn:li:corpuser:b2fd91.kirk@example.com",
+      "urn:li:corpuser:b2fd91.marty@example.com",
+      "urn:li:corpuser:b2fd91.michael@example.com",
+      "urn:li:corpuser:b2fd91.patrick1@example.com",
+      "urn:li:corpuser:b2fd91.sam@example.com"
+    ]
+  },
+  "hypotheses": [
+    {
+      "cause_type": "schema_drift_upstream",
+      "statement": "The upstream S3 data or the ingestion job process has introduced NULLs that violate the original schema assumptions, likely due to source data drift or ingestion logic errors.",
+      "confidence": 0.7,
+      "evidence": [
+        "The upstream S3 dataset defines 'customer_id' as 'nullable: false', whereas the downstream Snowflake table defines it as 'nullable: true'. Despite the upstream constraint, data is manifesting as NULL in the downstream table, suggesting the ingestion job is either failing to enforce the NOT NULL constraint or the data in the source S3 bucket itself has drifted to include NULLs that were not captured in the DataHub schema metadata for the S3 source."
+      ],
+      "evidence_urns": [
+        "urn:li:dataset:(urn:li:dataPlatform:s3,b2fd91.demo-data-bucket/order_entry/orders,PROD)",
+        "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)"
+      ]
+    },
+    {
+      "cause_type": "data_source_issue",
+      "statement": "The Spark ingestion pipeline contains logic errors (e.g., incorrect join types or record filtering) that result in NULLs for the customer_id field.",
+      "confidence": 0.3,
+      "evidence": [
+        "The upstream data pipeline (import_table_orders_to_snowflake) might be silently failing to handle missing records or performing an outer join in its internal transformation logic that introduces NULLs into the 'customer_id' column during the ingestion process."
+      ],
+      "evidence_urns": [
+        "urn:li:dataJob:(urn:li:dataFlow:(spark,b2fd91.import_table_orders_to_snowflake,b2fd91.default),b2fd91.import_table_orders_to_snowflake)"
+      ]
+    }
+  ],
+  "plan": {
+    "mutations": [
+      {
+        "tool": "add_tags",
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+        "args": {
+          "entity_urns": [
+            "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)"
+          ],
+          "tag_urns": [
+            "urn:li:tag:hindsight-degraded"
+          ]
+        },
+        "rationale": "Tagging the primary broken asset as degraded."
+      },
+      {
+        "tool": "update_description",
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+        "args": {
+          "operation": "append",
+          "entity_urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+          "description": "## ⚠️ Incident Notice: 2026-08-08 03:00 UTC\nThe 'customer_id' column in this table is unexpectedly containing NULL values due to an upstream schema change. Downstream reports are impacted. Investigation is underway."
+        },
+        "rationale": "Adding incident warning to the broken asset description."
+      },
+      {
+        "tool": "add_tags",
+        "urn": "urn:li:dashboard:(powerbi,b2fd91.reports.66666666-7777-8888-9999-000000000000)",
+        "args": {
+          "tag_urns": [
+            "urn:li:tag:hindsight-impacted"
+          ],
+          "entity_urns": [
+            "urn:li:dashboard:(powerbi,b2fd91.reports.66666666-7777-8888-9999-000000000000)",
+            "urn:li:dashboard:(looker,b2fd91.dashboards.53)",
+            "urn:li:dataset:(urn:li:dataPlatform:dbt,b2fd91.ORDER_ENTRY_DB.analytics.order_details,PROD)"
+          ]
+        },
+        "rationale": "Tagging high-impact downstream consumers as impacted."
+      }
+    ],
+    "postmortem_title": "2026-08-08 Unexpected NULLs in Order Entry customer_id Column"
+  },
+  "committed": [
+    {
+      "tool": "add_tags",
+      "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+      "args": {
+        "entity_urns": [
+          "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)"
+        ],
+        "tag_urns": [
+          "urn:li:tag:hindsight-degraded"
+        ]
+      },
+      "rationale": "Tagging the primary broken asset as degraded.",
+      "via": "mcp",
+      "ok": true,
+      "error": null
+    },
+    {
+      "tool": "update_description",
+      "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+      "args": {
+        "operation": "append",
+        "entity_urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+        "description": "## ⚠️ Incident Notice: 2026-08-08 03:00 UTC\nThe 'customer_id' column in this table is unexpectedly containing NULL values due to an upstream schema change. Downstream reports are impacted. Investigation is underway."
+      },
+      "rationale": "Adding incident warning to the broken asset description.",
+      "via": "mcp",
+      "ok": true,
+      "error": null
+    },
+    {
+      "tool": "add_tags",
+      "urn": "urn:li:dashboard:(powerbi,b2fd91.reports.66666666-7777-8888-9999-000000000000)",
+      "args": {
+        "tag_urns": [
+          "urn:li:tag:hindsight-impacted"
+        ],
+        "entity_urns": [
+          "urn:li:dashboard:(powerbi,b2fd91.reports.66666666-7777-8888-9999-000000000000)",
+          "urn:li:dashboard:(looker,b2fd91.dashboards.53)",
+          "urn:li:dataset:(urn:li:dataPlatform:dbt,b2fd91.ORDER_ENTRY_DB.analytics.order_details,PROD)"
+        ]
+      },
+      "rationale": "Tagging high-impact downstream consumers as impacted.",
+      "via": "mcp",
+      "ok": true,
+      "error": null
+    }
+  ],
+  "postmortem_ref": "urn:li:document:shared-bb0cf27d-a698-4a1a-820e-831e6f8632d0",
+  "tool_calls": 20,
+  "status": "done"
+}

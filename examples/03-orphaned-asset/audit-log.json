@@ -1,53 +1,52 @@
 [
   {
-    "timestamp": "2026-08-07T00:03:53.340793+00:00",
-    "incident_id": "e53eb86f",
+    "timestamp": "2026-08-08T00:31:22.756876+00:00",
+    "incident_id": "94310b0b",
     "tool": "add_tags",
     "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)",
     "args": {
+      "entity_urns": [
+        "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)"
+      ],
       "tag_urns": [
         "urn:li:tag:hindsight-degraded"
-      ],
-      "entity_urns": [
-        "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)",
-        "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_details,PROD)"
       ]
     },
-    "rationale": "Tagging degraded analytics tables.",
+    "rationale": "Marking stale order_history table as degraded due to freshness incident.",
     "via": "mcp",
     "ok": true,
     "error": null
   },
   {
-    "timestamp": "2026-08-07T00:03:53.823984+00:00",
-    "incident_id": "e53eb86f",
+    "timestamp": "2026-08-08T00:31:23.257415+00:00",
+    "incident_id": "94310b0b",
     "tool": "update_description",
     "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)",
     "args": {
-      "description": "[2026-08-06] WARNING: Data freshness failure. The table has not been updated since yesterday. Status: Investigation in progress.",
+      "description": "[2026-08-07] WARNING: This asset is currently experiencing freshness issues. Data is stale.",
       "operation": "append",
       "entity_urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)"
     },
-    "rationale": "Adding freshness warning to the affected Snowflake table.",
+    "rationale": "Adding warning to description regarding freshness incident.",
     "via": "mcp",
     "ok": true,
     "error": null
   },
   {
-    "timestamp": "2026-08-07T00:03:54.261632+00:00",
-    "incident_id": "e53eb86f",
+    "timestamp": "2026-08-08T00:31:23.807476+00:00",
+    "incident_id": "94310b0b",
     "tool": "add_owners",
     "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)",
     "args": {
       "owner_urns": [
         "urn:li:corpGroup:b2fd91.ORG_DATA_PLATFORM"
       ],
+      "ownership_type": "TECHNICAL_OWNER",
       "entity_urns": [
         "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)"
-      ],
-      "ownership_type": "__system__technical_owner"
+      ]
     },
-    "rationale": "Assigning the data platform group as the technical owner of the order_history table.",
+    "rationale": "Assigning missing ownership to the analytics order_history table as requested.",
     "via": "mcp",
     "ok": true,
     "error": null

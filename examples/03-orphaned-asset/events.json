@@ -1,0 +1,513 @@
+[
+  {
+    "phase": "intake",
+    "kind": "start",
+    "message": "Understanding the incident report",
+    "data": {}
+  },
+  {
+    "phase": "intake",
+    "kind": "info",
+    "message": "Parsing incident report",
+    "data": {}
+  },
+  {
+    "phase": "intake",
+    "kind": "result",
+    "message": "Symptom: freshness. Assets mentioned: analytics.order_history",
+    "data": {
+      "mentioned_assets": [
+        "analytics.order_history"
+      ],
+      "symptom_type": "freshness",
+      "symptom_description": "The order_history table in the analytics schema has not been updated since yesterday.",
+      "detected_at": "2026-08-07"
+    }
+  },
+  {
+    "phase": "resolve",
+    "kind": "start",
+    "message": "Resolving asset names to DataHub URNs",
+    "data": {}
+  },
+  {
+    "phase": "resolve",
+    "kind": "tool_call",
+    "message": "search(query=order_history)",
+    "data": {
+      "tool": "search",
+      "args": {
+        "query": "order_history"
+      },
+      "error": false
+    }
+  },
+  {
+    "phase": "resolve",
+    "kind": "tool_call",
+    "message": "get_entities(urns=['urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order)",
+    "data": {
+      "tool": "get_entities",
+      "args": {
+        "urns": [
+          "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)",
+          "urn:li:dataset:(urn:li:dataPlatform:dbt,b2fd91.ORDER_ENTRY_DB.analytics.order_history,PROD)"
+        ]
+      },
+      "error": false
+    }
+  },
+  {
+    "phase": "resolve",
+    "kind": "warning",
+    "message": "Ambiguity: There were two potential matches: the Snowflake table (the physical asset) and the dbt model (the definition). I have selected the Snowflake table as the primary asset because it represents the actual data that is stale in production. The dbt model is included as an alternative. Both assets lack an explicit owner field in their catalog entries, confirming the report that no owner is assigned, though the Snowflake table contains additional information regarding its staleness in its editable properties.",
+    "data": {}
+  },
+  {
+    "phase": "resolve",
+    "kind": "result",
+    "message": "Resolved to urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)",
+    "data": {
+      "resolved_asset": {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)",
+        "name": "ORDER_HISTORY (Snowflake Table)",
+        "type": "Snowflake Table",
+        "owners": [],
+        "domain": "urn:li:domain:b2fd91.d4f24004-fb54-4e3c-8dea-2b7e209230b0"
+      },
+      "alternatives": [
+        {
+          "urn": "urn:li:dataset:(urn:li:dataPlatform:dbt,b2fd91.ORDER_ENTRY_DB.analytics.order_history,PROD)",
+          "name": "order_history (dbt model)",
+          "type": "dbt model",
+          "owners": [],
+          "domain": ""
+        }
+      ],
+      "ambiguity_note": "There were two potential matches: the Snowflake table (the physical asset) and the dbt model (the definition). I have selected the Snowflake table as the primary asset because it represents the actual data that is stale in production. The dbt model is included as an alternative. Both assets lack an explicit owner field in their catalog entries, confirming the report that no owner is assigned, though the Snowflake table contains additional information regarding its staleness in its editable properties."
+    }
+  },
+  {
+    "phase": "recall",
+    "kind": "start",
+    "message": "Searching incident memory in DataHub",
+    "data": {}
+  },
+  {
+    "phase": "recall",
+    "kind": "tool_call",
+    "message": "search_documents(query=order_history freshness analytics schema, semantic_query=order_history table freshness incident analytics schema snow)",
+    "data": {
+      "tool": "search_documents",
+      "args": {
+        "query": "order_history freshness analytics schema",
+        "semantic_query": "order_history table freshness incident analytics schema snowflake"
+      },
+      "error": false
+    }
+  },
+  {
+    "phase": "recall",
+    "kind": "tool_call",
+    "message": "grep_documents(urns=['urn:li:document:shared-9cf67949-2034-4b31-a135-d05e814a370, pattern=order_history)",
+    "data": {
+      "tool": "grep_documents",
+      "args": {
+        "urns": [
+          "urn:li:document:shared-9cf67949-2034-4b31-a135-d05e814a3709"
+        ],
+        "pattern": "order_history"
+      },
+      "error": false
+    }
+  },
+  {
+    "phase": "recall",
+    "kind": "result",
+    "message": "Found 1 similar prior incident(s). Memory suggests: check urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD) first (Previous similar incidents for this asset were caused by upstream degradation in the 'orders' table. Investigate if the orders table is currently degraded.)",
+    "data": {
+      "prior_incidents": [
+        {
+          "title": "Staleness of order_history dataset due to upstream orders table failure",
+          "reference": "urn:li:document:shared-9cf67949-2034-4b31-a135-d05e814a3709",
+          "similarity": "high",
+          "prior_resolution": "Resolved after upstream orders table degradation was addressed.",
+          "summary": "Staleness of order_history due to upstream orders table failure."
+        }
+      ],
+      "investigation_hints": [
+        {
+          "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+          "cause_type": "upstream_incident",
+          "reason": "Previous similar incidents for this asset were caused by upstream degradation in the 'orders' table. Investigate if the orders table is currently degraded."
+        }
+      ]
+    }
+  },
+  {
+    "phase": "impact",
+    "kind": "start",
+    "message": "Walking downstream lineage to compute blast radius",
+    "data": {}
+  },
+  {
+    "phase": "impact",
+    "kind": "tool_call",
+    "message": "get_lineage(urn=urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_e, upstream=False, max_hops=3)",
+    "data": {
+      "tool": "get_lineage",
+      "args": {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)",
+        "upstream": false,
+        "max_hops": 3
+      },
+      "error": false
+    }
+  },
+  {
+    "phase": "impact",
+    "kind": "tool_call",
+    "message": "get_lineage(urn=urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_e, upstream=False, max_hops=3, query=*)",
+    "data": {
+      "tool": "get_lineage",
+      "args": {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)",
+        "upstream": false,
+        "max_hops": 3,
+        "query": "*"
+      },
+      "error": false
+    }
+  },
+  {
+    "phase": "impact",
+    "kind": "tool_call",
+    "message": "get_entities(urns=['urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order)",
+    "data": {
+      "tool": "get_entities",
+      "args": {
+        "urns": [
+          "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)"
+        ]
+      },
+      "error": false
+    }
+  },
+  {
+    "phase": "impact",
+    "kind": "tool_call",
+    "message": "get_lineage(max_hops=3, upstream=False, urn=urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_e)",
+    "data": {
+      "tool": "get_lineage",
+      "args": {
+        "max_hops": 3,
+        "upstream": false,
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)"
+      },
+      "error": false
+    }
+  },
+  {
+    "phase": "impact",
+    "kind": "result",
+    "message": "0 downstream consumers affected, total impact score 0.0. Owners to notify: none found",
+    "data": {
+      "impacted": [],
+      "total_score": 0.0,
+      "owners_to_notify": []
+    }
+  },
+  {
+    "phase": "root_cause",
+    "kind": "start",
+    "message": "Investigating upstream lineage for the root cause",
+    "data": {}
+  },
+  {
+    "phase": "root_cause",
+    "kind": "tool_call",
+    "message": "get_entities(urns=['urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order)",
+    "data": {
+      "tool": "get_entities",
+      "args": {
+        "urns": [
+          "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)"
+        ]
+      },
+      "error": false
+    }
+  },
+  {
+    "phase": "root_cause",
+    "kind": "tool_call",
+    "message": "get_lineage(upstream=True, urn=urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_e)",
+    "data": {
+      "tool": "get_lineage",
+      "args": {
+        "upstream": true,
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)"
+      },
+      "error": false
+    }
+  },
+  {
+    "phase": "root_cause",
+    "kind": "tool_call",
+    "message": "get_lineage_paths_between(target_urn=urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_e, source_urn=urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_e)",
+    "data": {
+      "tool": "get_lineage_paths_between",
+      "args": {
+        "target_urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)",
+        "source_urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)"
+      },
+      "error": false
+    }
+  },
+  {
+    "phase": "root_cause",
+    "kind": "tool_call",
+    "message": "get_entities(urns=['urn:li:query:b2fd91.d214c8a2c9700f13f5c4f3c802b1d88272d67c)",
+    "data": {
+      "tool": "get_entities",
+      "args": {
+        "urns": [
+          "urn:li:query:b2fd91.d214c8a2c9700f13f5c4f3c802b1d88272d67cc0b75d56db28df8855ab9d51a9",
+          "urn:li:query:b2fd91.composite_43801da2d8c7c2f1b55685b7691f0e6885ac6a620f5bb3471e11fb7d2f845e3e"
+        ]
+      },
+      "error": false
+    }
+  },
+  {
+    "phase": "root_cause",
+    "kind": "tool_call",
+    "message": "get_dataset_queries(urn=urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_e, source=SYSTEM)",
+    "data": {
+      "tool": "get_dataset_queries",
+      "args": {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)",
+        "source": "SYSTEM"
+      },
+      "error": false
+    }
+  },
+  {
+    "phase": "root_cause",
+    "kind": "tool_call",
+    "message": "get_dataset_queries(source=MANUAL, urn=urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_e)",
+    "data": {
+      "tool": "get_dataset_queries",
+      "args": {
+        "source": "MANUAL",
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)"
+      },
+      "error": false
+    }
+  },
+  {
+    "phase": "root_cause",
+    "kind": "tool_call",
+    "message": "get_dataset_queries(urn=urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_e, source=SYSTEM)",
+    "data": {
+      "tool": "get_dataset_queries",
+      "args": {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+        "source": "SYSTEM"
+      },
+      "error": false
+    }
+  },
+  {
+    "phase": "root_cause",
+    "kind": "tool_call",
+    "message": "get_dataset_queries(urn=urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_e, source=MANUAL)",
+    "data": {
+      "tool": "get_dataset_queries",
+      "args": {
+        "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+        "source": "MANUAL"
+      },
+      "error": false
+    }
+  },
+  {
+    "phase": "root_cause",
+    "kind": "tool_call",
+    "message": "get_entities(urns=['urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order)",
+    "data": {
+      "tool": "get_entities",
+      "args": {
+        "urns": [
+          "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_details,PROD)"
+        ]
+      },
+      "error": false
+    }
+  },
+  {
+    "phase": "root_cause",
+    "kind": "result",
+    "message": "1 hypothesis(es). Top: The freshness issue in ORDER_HISTORY is caused by a failure in the upstream ORDERS table, which is currently experiencing an active incident ('hindsight-degraded') involving data quality problems that are propagating through the pipeline. (confidence 90%)",
+    "data": {
+      "hypotheses": [
+        {
+          "cause_type": "upstream_incident",
+          "statement": "The freshness issue in ORDER_HISTORY is caused by a failure in the upstream ORDERS table, which is currently experiencing an active incident ('hindsight-degraded') involving data quality problems that are propagating through the pipeline.",
+          "confidence": 0.9,
+          "evidence": [
+            "The ORDERS source table (urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)) is currently tagged as 'hindsight-degraded', indicating an active incident. Multiple recent documents (e.g., 2026-08-08 incident report) confirm ongoing data quality issues (NULLs in customer_id) in this table, which likely triggered the pipeline failure leading to the freshness issue in ORDER_HISTORY."
+          ],
+          "evidence_urns": [
+            "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "phase": "propose",
+    "kind": "start",
+    "message": "Drafting the action plan",
+    "data": {}
+  },
+  {
+    "phase": "propose",
+    "kind": "info",
+    "message": "Building action plan (dry-run)",
+    "data": {}
+  },
+  {
+    "phase": "propose",
+    "kind": "result",
+    "message": "Action plan ready: 3 mutation(s) + 1 postmortem document. Awaiting human approval.",
+    "data": {
+      "mutations": [
+        {
+          "tool": "add_tags",
+          "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)",
+          "args": {
+            "entity_urns": [
+              "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)"
+            ],
+            "tag_urns": [
+              "urn:li:tag:hindsight-degraded"
+            ]
+          },
+          "rationale": "Marking stale order_history table as degraded due to freshness incident."
+        },
+        {
+          "tool": "update_description",
+          "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)",
+          "args": {
+            "description": "[2026-08-07] WARNING: This asset is currently experiencing freshness issues. Data is stale.",
+            "operation": "append",
+            "entity_urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)"
+          },
+          "rationale": "Adding warning to description regarding freshness incident."
+        },
+        {
+          "tool": "add_owners",
+          "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)",
+          "args": {
+            "owner_urns": [
+              "urn:li:corpGroup:b2fd91.ORG_DATA_PLATFORM"
+            ],
+            "ownership_type": "TECHNICAL_OWNER",
+            "entity_urns": [
+              "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)"
+            ]
+          },
+          "rationale": "Assigning missing ownership to the analytics order_history table as requested."
+        }
+      ],
+      "postmortem_title": "Staleness Incident in analytics.order_history (2026-08-07)"
+    }
+  },
+  {
+    "phase": "commit",
+    "kind": "start",
+    "message": "Writing approved changes back to DataHub",
+    "data": {}
+  },
+  {
+    "phase": "commit",
+    "kind": "info",
+    "message": "Applied add_tags via mcp: Marking stale order_history table as degraded due to freshness incident.",
+    "data": {
+      "tool": "add_tags",
+      "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)",
+      "args": {
+        "entity_urns": [
+          "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)"
+        ],
+        "tag_urns": [
+          "urn:li:tag:hindsight-degraded"
+        ]
+      },
+      "rationale": "Marking stale order_history table as degraded due to freshness incident.",
+      "via": "mcp",
+      "ok": true,
+      "error": null
+    }
+  },
+  {
+    "phase": "commit",
+    "kind": "info",
+    "message": "Applied update_description via mcp: Adding warning to description regarding freshness incident.",
+    "data": {
+      "tool": "update_description",
+      "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)",
+      "args": {
+        "description": "[2026-08-07] WARNING: This asset is currently experiencing freshness issues. Data is stale.",
+        "operation": "append",
+        "entity_urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)"
+      },
+      "rationale": "Adding warning to description regarding freshness incident.",
+      "via": "mcp",
+      "ok": true,
+      "error": null
+    }
+  },
+  {
+    "phase": "commit",
+    "kind": "info",
+    "message": "Applied add_owners via mcp: Assigning missing ownership to the analytics order_history table as requested.",
+    "data": {
+      "tool": "add_owners",
+      "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)",
+      "args": {
+        "owner_urns": [
+          "urn:li:corpGroup:b2fd91.ORG_DATA_PLATFORM"
+        ],
+        "ownership_type": "TECHNICAL_OWNER",
+        "entity_urns": [
+          "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)"
+        ]
+      },
+      "rationale": "Assigning missing ownership to the analytics order_history table as requested.",
+      "via": "mcp",
+      "ok": true,
+      "error": null
+    }
+  },
+  {
+    "phase": "commit",
+    "kind": "result",
+    "message": "3/3 mutations applied to DataHub. Audit log: var/audit-log.jsonl",
+    "data": {}
+  },
+  {
+    "phase": "learn",
+    "kind": "start",
+    "message": "Saving the postmortem to DataHub memory",
+    "data": {}
+  },
+  {
+    "phase": "learn",
+    "kind": "result",
+    "message": "Postmortem \"Staleness Incident in analytics.order_history (2026-08-07)\" saved to DataHub. The next investigation of a similar incident will start from it.",
+    "data": {
+      "reference": "urn:li:document:shared-52dd787a-5fe5-49ec-b32d-99391ef9176f"
+    }
+  }
+]

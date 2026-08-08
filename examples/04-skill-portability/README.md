@@ -8,40 +8,51 @@ connected reproduces the agent's behaviour without this repository. This run tes
 
 ## Setup
 
-An agent was given the same incident text as [`01-schema-drift`](../01-schema-drift/), told to
-follow `SKILL.md` and nothing else, and connected to `mcp-server-datahub` against the local
-DataHub quickstart. **No Hindsight backend code was in the loop** — not the orchestrator, not the
-phase prompts, not `datahub/lineage.py`. The impact scores below were computed by hand from the
-formula in the skill's own `references/impact-scoring-reference.md`.
+An agent was given the incident text of the schema-drift scenario, told to follow `SKILL.md` and
+nothing else, and connected to `mcp-server-datahub` against the local DataHub quickstart. **No
+Hindsight backend code was in the loop** — not the orchestrator, not the phase prompts, not
+`datahub/lineage.py`. The impact scores below were computed by hand from the formula in the skill's
+own `references/impact-scoring-reference.md`.
+
+The comparison column is [`02-cold-vs-warm/cold`](../02-cold-vs-warm/cold/): the Hindsight run of
+the *same incident text* against the same catalog, and the widest sweep any captured run produced.
 
 ## Result
 
-| Measure                           | [`01-schema-drift`](../01-schema-drift/) (Hindsight) | This run (Skill only)           |
-| --------------------------------- | ---------------------------------------------------- | ------------------------------- |
-| Resolved asset                    | Snowflake `orders`                                   | Snowflake `orders` — same URN   |
-| Prior incidents recalled          | 1                                                    | 4                               |
-| Investigation tool calls          | 16                                                   | **9**                           |
-| Consumers found                   | 20                                                   | 30                              |
-| Owners to notify                  | 14                                                   | **the same 14**                 |
-| Top root cause                    | upstream Postgres incident, 90%                      | schema drift upstream, 90%      |
-| Second hypothesis                 | — (single hypothesis)                                | upstream Postgres incident, 75% |
-| Mutations applied                 | 3                                                    | 3 + postmortem                  |
-| Postmortem retrievable afterwards | yes                                                  | yes — second hit on re-search   |
+| Measure                           | [`02-cold-vs-warm/cold`](../02-cold-vs-warm/cold/) (Hindsight) | This run (Skill only)           |
+| --------------------------------- | -------------------------------------------------------------- | ------------------------------- |
+| Resolved asset                    | Snowflake `orders`                                             | Snowflake `orders` — same URN   |
+| Prior incidents recalled          | 0 (cold)                                                       | 4                               |
+| Investigation tool calls          | 20                                                             | **9**                           |
+| Consumers found                   | 29                                                             | 30                              |
+| Owners to notify                  | 14                                                             | **the same 14 URNs, set for set** |
+| Top root cause                    | S3 source drift / ingestion logic, 70%                         | schema drift upstream, 90%      |
+| Second hypothesis                 | ingestion pipeline defect                                      | upstream Postgres incident, 75% |
+| Mutations applied                 | 3                                                              | 3 + postmortem                  |
+| Postmortem retrievable afterwards | yes                                                            | yes — second hit on re-search   |
 
-The second hypothesis is verbatim what `01-schema-drift` concluded, on the same evidence. The first
-is something the Hindsight run never reported: the
+Two independent implementations of the same procedure, one in Python and one in prose, walked the
+same graph and arrived at the same fourteen owner URNs — compare `Owners to notify` in
+[`blast-radius.md`](blast-radius.md) against
+[`../02-cold-vs-warm/cold/blast-radius.md`](../02-cold-vs-warm/cold/blast-radius.md) line for line.
+
+The Skill's top hypothesis is something no Hindsight run reported: the
 `ALTER TABLE order_entry.orders ALTER COLUMN customer_id DROP NOT NULL;` note on the asset itself —
-precisely what `scenarios/break_schema.py` plants as the scenario's actual cause, where
-`01-schema-drift`'s postmortem cites only the upstream tag.
+precisely what `scenarios/break_schema.py` plants as the scenario's actual cause.
 
 ## Caveats
 
-- **9 calls versus 16 does not mean the skill beats Hindsight.** This run found **4** prior
-  postmortems in memory; `01-schema-drift` found **1**. Much of the difference is accumulated
-  memory. The defensible claim is convergence, not a speed record.
+- **9 calls versus 20 does not mean the skill beats Hindsight.** This run found **4** prior
+  postmortems in memory; the run it is compared against was cold and found **none**. Most of the
+  difference is accumulated memory — the same effect scenario 2 measures deliberately. The
+  defensible claim is convergence, not a speed record.
 - **Warm run.** The Postgres ancestor was already tagged `hindsight-degraded` by earlier runs,
   which is what made `upstream_incident` cheap to confirm. The memory loop working as designed,
   but not a cold start.
+- **Captured before the runs it is compared against.** The four Hindsight runs in `examples/` were
+  re-captured against a freshly rebuilt catalog; this one was left exactly as it ran, because its
+  whole value is not having gone through this repository's code. Same catalog, same datapack, same
+  incident text.
 - **`audit-log.json` was captured by hand** from the MCP responses, not generated by
   `cli.py:_write_report`. Same schema so the files read side by side, minus `timestamp` (omitted
   rather than fabricated) and plus `response` (the server's reply); the postmortem body lives in

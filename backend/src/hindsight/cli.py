@@ -14,7 +14,7 @@ from hindsight.agent.orchestrator import investigate as run_investigation
 from hindsight.config import settings
 from hindsight.datahub.mcp_client import DataHubMCP
 from hindsight.memory.postmortem import blast_table, postmortem_title, render_markdown
-from hindsight.models import InvestigationState, TimelineEvent
+from hindsight.models import ActionPlan, InvestigationState, TimelineEvent
 from hindsight.safety.audit_log import records_for
 from hindsight.safety.dry_run import render_plan
 
@@ -24,6 +24,8 @@ console = Console()
 REPORT_OPTION = typer.Option(
     None, "--report", help="Write investigation artifacts to this directory"
 )
+
+REPLAY_ARGUMENT = typer.Argument(..., help="Report directory written by --report")
 
 STYLES = {
     "start": ("bold cyan", "▶"),
@@ -72,6 +74,11 @@ def _write_report(state: InvestigationState, events: list[TimelineEvent], path: 
     (path / "postmortem.md").write_text(render_markdown(state, title) + "\n")
 
     (path / "audit-log.json").write_text(json.dumps(records_for(state.id), indent=2) + "\n")
+
+    (path / "events.json").write_text(
+        json.dumps([e.model_dump(mode="json") for e in events], indent=2) + "\n"
+    )
+    (path / "state.json").write_text(state.model_dump_json(indent=2) + "\n")
 
 
 async def _run(state: InvestigationState, events: list[TimelineEvent], auto_approve: bool) -> int:
@@ -124,6 +131,28 @@ def investigate(
             _write_report(state, events, report)
             console.print(f"\nReport written to {report}", style="dim")
     raise typer.Exit(code)
+
+
+@app.command()
+def replay(
+    directory: Path = REPLAY_ARGUMENT,
+) -> None:
+    events_file = directory / "events.json"
+    if not events_file.exists():
+        console.print(f"No events.json in {directory}", style="red")
+        raise typer.Exit(1)
+
+    for raw in json.loads(events_file.read_text()):
+        _print_event(TimelineEvent.model_validate(raw))
+
+    state = InvestigationState.model_validate_json((directory / "state.json").read_text())
+    console.print()
+    console.print(
+        Panel(render_plan(state.plan or ActionPlan()), title="Action plan", border_style="cyan")
+    )
+    console.print(
+        f"Status: {state.status}. DataHub tool calls used: {state.tool_calls}.", style="bold"
+    )
 
 
 @app.command()

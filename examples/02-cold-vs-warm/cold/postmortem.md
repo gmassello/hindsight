@@ -1,64 +1,59 @@
-# Postmortem: Null customer_id Ingestion from Postgres Source into Snowflake Orders Table
+# 2026-08-08 Unexpected NULLs in Order Entry customer_id Column
 
 **Asset**: urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)
-**Detected**: 03:00 UTC
-**Symptom**: nulls — The orders table in order_entry_db contains NULL values in customer_id.
+**Detected**: 2026-08-08 03:00 UTC
+**Symptom**: nulls — The orders table in order_entry_db is showing NULL values in the customer_id column.
 **Status**: active
 
 ## Blast radius
-30 affected consumers within 5 hops. Score: 27.75
+29 affected consumers within 4 hops. Score: 30.08
 Owners notified: urn:li:corpGroup:b2fd91.1e0398a3-113f-475e-b6fc-32ab72a634d2, urn:li:corpGroup:b2fd91.ORG_BACKEND_ENG, urn:li:corpGroup:b2fd91.ORG_DATA_PLATFORM, urn:li:corpuser:b2fd91.EMP006, urn:li:corpuser:b2fd91.alex@example.com, urn:li:corpuser:b2fd91.brock1@example.com, urn:li:corpuser:b2fd91.bryan@example.com, urn:li:corpuser:b2fd91.jonny1@example.com, urn:li:corpuser:b2fd91.jonny2@example.com, urn:li:corpuser:b2fd91.kirk@example.com, urn:li:corpuser:b2fd91.marty@example.com, urn:li:corpuser:b2fd91.michael@example.com, urn:li:corpuser:b2fd91.patrick1@example.com, urn:li:corpuser:b2fd91.sam@example.com
 
 | Asset | Type | Hops | Score |
 |---|---|---|---|
 | datahub_order_entries | DASHBOARD | 3 | 2.25 |
-| orders | DATASET | 1 | 1.95 |
-| ORDER_DETAILS | DATASET | 1 | 1.95 |
-| Order Entry Dashboard | DASHBOARD | 5 | 1.95 |
-| order_details | DATASET | 2 | 1.3 |
-| order_details | DATASET | 2 | 1.3 |
-| Order Entry Dashboard | DASHBOARD | 5 | 1.3 |
+| Order Entry Dashboard | DASHBOARD | 3 | 2.25 |
+| order_details | DATASET | 1 | 1.5 |
+| orders | DATASET | 1 | 1.5 |
+| Orders By Month | CHART | 4 | 1.2 |
+| Popular Products Categories | CHART | 4 | 1.2 |
+| Promotions | CHART | 4 | 1.2 |
+| Order Mode | CHART | 4 | 1.2 |
 | ORDER_DETAILS | DATASET | 2 | 1.0 |
-| Order Details | DATASET | 3 | 0.98 |
-| order_history | DATASET | 2 | 0.87 |
+| ORDER_HISTORY | DATASET | 2 | 1.0 |
+| Customer Analytics Measures | DATASET | 2 | 1.0 |
+| Essential KPI Measures | DATASET | 2 | 1.0 |
+| Geographic Measures | DATASET | 2 | 1.0 |
+| Product Perfromance Measures | DATASET | 2 | 1.0 |
+| Time Inteligence Measures | DATASET | 2 | 1.0 |
+| order_details | DATASET | 2 | 1.0 |
+| order_history | DATASET | 2 | 1.0 |
+| Popular Products | CHART | 4 | 0.8 |
+| Promotions | CHART | 4 | 0.8 |
+| Order Entry Analytics | DATA_PRODUCT | 1 | 0.75 |
+| Order Details | DATASET | 3 | 0.75 |
 | Promotions | DATASET | 3 | 0.75 |
 | Order Mode | DATASET | 3 | 0.75 |
 | Orders By Day | DATASET | 3 | 0.75 |
 | Top Product Category | DATASET | 3 | 0.75 |
-| ORDER_HISTORY | DATASET | 2 | 0.67 |
-| Customer Analytics Measures | DATASET | 2 | 0.67 |
-| Essential KPI Measures | DATASET | 2 | 0.67 |
-| Geographic Measures | DATASET | 2 | 0.67 |
-| Product Perfromance Measures | DATASET | 2 | 0.67 |
-| Time Inteligence Measures | DATASET | 2 | 0.67 |
 | Custom SQL Query | DATASET | 2 | 0.67 |
 | Custom SQL Query | DATASET | 2 | 0.67 |
 | Custom SQL Query | DATASET | 2 | 0.67 |
 | Custom SQL Query | DATASET | 2 | 0.67 |
-| Orders By Month | CHART | 4 | 0.6 |
-| Popular Products Categories | CHART | 4 | 0.6 |
-| Promotions | CHART | 4 | 0.6 |
-| Order Mode | CHART | 4 | 0.6 |
-| Popular Products | CHART | 4 | 0.4 |
-| Promotions | CHART | 4 | 0.4 |
 
 ## Root cause hypotheses
-1. NULL values in customer_id originate at the upstream primary data source, the Postgres orders table (urn:li:dataset:(urn:li:dataPlatform:postgres,b2fd91.order_entry_db.order_entry.orders,PROD)), where customer_id is nullable and null records are ingested without filtering through the Spark export/import pipeline into Snowflake. — confidence 85%
-   - Lineage traces the Snowflake orders table back to the source Postgres table: urn:li:dataset:(urn:li:dataPlatform:postgres,b2fd91.order_entry_db.order_entry.orders,PROD) via Spark jobs export_table_orders_to_s3 and import_table_orders_to_snowflake.
-   - Column lineage confirmed via get_lineage_paths_between shows customer_id maps directly from Postgres orders through S3 to Snowflake orders with no intermediate transformation logic.
-   - The root Postgres orders dataset allows null values in customer_id (nullable: true), indicating that NULL customer_id records originate at the transactional data source.
-   - Evidence URNs: urn:li:dataset:(urn:li:dataPlatform:postgres,b2fd91.order_entry_db.order_entry.orders,PROD), urn:li:dataset:(urn:li:dataPlatform:s3,b2fd91.demo-data-bucket/order_entry/orders,PROD), urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD), urn:li:dataJob:(urn:li:dataFlow:(spark,b2fd91.export_table_orders_to_s3,b2fd91.default),b2fd91.export_table_orders_to_s3), urn:li:dataJob:(urn:li:dataFlow:(spark,b2fd91.import_table_orders_to_snowflake,b2fd91.default),b2fd91.import_table_orders_to_snowflake)
-2. Upstream schema drift on the Postgres source orders dataset allows NULL values in the customer_id column (nullable: true), whereas intermediate schemas (S3 parquet export) expected non-nullable values. — confidence 65%
-   - Schema inspection of Postgres orders shows customer_id is defined as nullable: true.
-   - In contrast, intermediate S3 parquet dataset schema definitions expected customer_id as non-nullable (nullable: false).
-   - The mismatch in nullability specification between the source Postgres table and intermediate storage schemas allowed NULL records to pass into Snowflake where customer_id is also nullable: true.
-   - Evidence URNs: urn:li:dataset:(urn:li:dataPlatform:postgres,b2fd91.order_entry_db.order_entry.orders,PROD), urn:li:dataset:(urn:li:dataPlatform:s3,b2fd91.demo-data-bucket/order_entry/orders,PROD), urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)
+1. The upstream S3 data or the ingestion job process has introduced NULLs that violate the original schema assumptions, likely due to source data drift or ingestion logic errors. — confidence 70%
+   - The upstream S3 dataset defines 'customer_id' as 'nullable: false', whereas the downstream Snowflake table defines it as 'nullable: true'. Despite the upstream constraint, data is manifesting as NULL in the downstream table, suggesting the ingestion job is either failing to enforce the NOT NULL constraint or the data in the source S3 bucket itself has drifted to include NULLs that were not captured in the DataHub schema metadata for the S3 source.
+   - Evidence URNs: urn:li:dataset:(urn:li:dataPlatform:s3,b2fd91.demo-data-bucket/order_entry/orders,PROD), urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)
+2. The Spark ingestion pipeline contains logic errors (e.g., incorrect join types or record filtering) that result in NULLs for the customer_id field. — confidence 30%
+   - The upstream data pipeline (import_table_orders_to_snowflake) might be silently failing to handle missing records or performing an outer join in its internal transformation logic that introduces NULLs into the 'customer_id' column during the ingestion process.
+   - Evidence URNs: urn:li:dataJob:(urn:li:dataFlow:(spark,b2fd91.import_table_orders_to_snowflake,b2fd91.default),b2fd91.import_table_orders_to_snowflake)
 
 ## Resolution
 Pending human confirmation.
 
 ## Detection signals
-Watch for data source issue on the assets cited above.
+Watch for schema drift upstream on the assets cited above.
 
 ## Tags
-hindsight, nulls, data_source_issue
+hindsight, nulls, schema_drift_upstream
