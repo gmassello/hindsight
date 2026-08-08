@@ -38,7 +38,7 @@ The track rewards agents that **read** DataHub, **act**, and **write back**. All
 
 ### Pending
 
-- [ ] Hosted demo reachable by URL — **required by the rules**; static replay of the captured runs on GitHub Pages
+- [x] Hosted demo reachable by URL — **required by the rules**: https://gmassello.github.io/hindsight/ — static replay of the captured runs on GitHub Pages, published by `.github/workflows/pages.yml`. Overview page alongside it at `/landing/`
 - [ ] Video: 3 minutes, **public**, script written before recording with a timer per section
   - [ ] Opens with the real on-call pain (first 20 seconds → applicability criterion)
   - [ ] Shows scenario 2 (cold vs. warm) as the closing moment
@@ -56,7 +56,7 @@ All six criteria weigh equally; each needs an explicit answer.
 | Technical quality | Deterministic phase pipeline, per-phase toolset, dry-run, tests, GraphQL fallback | README "How it works" + `backend/tests/` |
 | Originality | The memory loop: the system improves with use and the knowledge lives in DataHub | Scenario 2 in the video |
 | Real-world applicability | Data on-call: concrete, expensive pain, backed by first-hand experience | First 20 seconds of the video |
-| Delivery quality | `docker compose up` + README + `examples/` today; hosted demo, GIF and video pending | Everything |
+| Delivery quality | `docker compose up` + README + `examples/` + hosted demo today; video pending | Everything |
 | **Open source bonus** | `datahub-incident-triage` Skill proposed upstream | [datahub-skills#110](https://github.com/datahub-project/datahub-skills/pull/110) |
 
 ## Demo scenarios

@@ -47,6 +47,7 @@ cd backend && .venv/bin/hindsight replay ../examples/02-cold-vs-warm/warm    # n
 
 | | |
 | --- | --- |
+| **Try it without installing** | [The hosted demo](https://gmassello.github.io/hindsight/) — replays a captured investigation in the browser: evidence timeline, ranked blast radius, the approval gate |
 | **See the memory loop pay off** | [`examples/02-cold-vs-warm`](examples/02-cold-vs-warm) — the same incident, 20 tool calls cold vs. 15 warm |
 | **See it do real work** | [`examples/01-schema-drift`](examples/01-schema-drift) — 14 tool calls, 16 consumers, 10 owners paged, postmortem filed, `verified 5/5` |
 | **See it work without our code** | [`examples/04-skill-portability`](examples/04-skill-portability) — the same procedure as a portable Agent Skill, [proposed upstream](https://github.com/datahub-project/datahub-skills/pull/110) |
@@ -245,7 +246,7 @@ Unit tests mock the LLM and MCP client. Covered: the scoring formula, the phase 
 - [`docs/notes-from-the-build.md`](docs/notes-from-the-build.md) — eight traps that cost hours against a real DataHub and a real model, written down so they cost you minutes.
 - [`docs/configuration.md`](docs/configuration.md) — every environment variable, and the repo layout.
 - [`SUBMISSION.md`](SUBMISSION.md) — delivery status.
-- [The overview page](https://gmassello.github.io/hindsight/landing/) — the same story on one page. The [interactive demo](https://gmassello.github.io/hindsight/) replays a captured run in the browser, no install.
+- [The overview page](https://gmassello.github.io/hindsight/landing/) — the same story on one page, for linking from outside the repo.
 
 ## License
 
