@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(0.96 0.004 250); }
+  a { color: oklch(0.72 0.12 210); }
+  a:hover { color: oklch(0.80 0.12 210); }
+</style>
+</helmet>
+
+<div style="display: flex; flex-direction: column; gap: 40px; padding: 40px; font-family: 'IBM Plex Sans', system-ui, sans-serif;">
+
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.55 0.01 250);">01 — hero.png · 1280×400</div>
+    <div id="art-hero" data-screen-label="Hero" style="width: 1280px; height: 400px; background: oklch(0.19 0.012 255); position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: center; padding: 0 72px; box-sizing: border-box;">
+      <div style="position: absolute; inset: 0; background-image: linear-gradient(oklch(1 0 0 / 0.035) 1px, transparent 1px), linear-gradient(90deg, oklch(1 0 0 / 0.035) 1px, transparent 1px); background-size: 32px 32px;"></div>
+      <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: oklch(0.78 0.15 68);"></div>
+      <div style="position: relative; display: flex; flex-direction: column; gap: 22px;">
+        <div style="display: flex; align-items: center; gap: 14px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: oklch(0.78 0.15 68);">
+          <span style="width: 9px; height: 9px; border-radius: 50%; background: oklch(0.78 0.15 68); display: block;"></span>
+          <span>incident · in progress</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div style="font-family: 'IBM Plex Sans', sans-serif; font-weight: 700; font-size: 92px; line-height: 0.92; letter-spacing: -0.035em; color: oklch(0.97 0.004 250);">Hindsight</div>
+          <div style="font-size: 27px; line-height: 1.35; letter-spacing: -0.012em; color: oklch(0.80 0.012 250); max-width: 830px; text-wrap: pretty;">The on-call agent for your data platform. It walks your DataHub lineage, names what broke and who it hits — then writes the answer back into the catalog.</div>
+        </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: oklch(0.75 0.012 250);">
+          <span style="padding: 7px 13px; border: 1px solid oklch(0.34 0.014 255); background: oklch(0.23 0.012 255);">read → act → write back</span>
+          <span style="padding: 7px 13px; border: 1px solid oklch(0.34 0.014 255); background: oklch(0.23 0.012 255);">13 MCP tools</span>
+          <span style="padding: 7px 13px; border: 1px solid oklch(0.34 0.014 255); background: oklch(0.23 0.012 255);">human gate by default</span>
+          <span style="padding: 7px 13px; border: 1px solid oklch(0.34 0.014 255); background: oklch(0.23 0.012 255);">memory lives in DataHub</span>
+        </div>
+      </div>
+      <div style="position: absolute; right: -60px; bottom: -140px; width: 420px; height: 420px; border-radius: 50%; border: 1px solid oklch(0.32 0.014 255);"></div>
+      <div style="position: absolute; right: 10px; bottom: -70px; width: 280px; height: 280px; border-radius: 50%; border: 1px solid oklch(0.30 0.014 255);"></div>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.55 0.01 250);">02 — pipeline.png · 1280×440</div>
+    <div id="art-pipeline" data-screen-label="Pipeline" style="width: 1280px; height: 440px; background: oklch(0.19 0.012 255); box-sizing: border-box; padding: 40px 48px; display: flex; flex-direction: column; gap: 26px; position: relative; overflow: hidden;">
+      <div style="display: flex; align-items: baseline; gap: 16px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: oklch(0.78 0.15 68);">the loop</div>
+        <div style="font-size: 15px; color: oklch(0.68 0.012 250);">Deterministic phase pipeline — ★ marks the two phases that make it memory instead of documentation.</div>
+      </div>
+
+      <div style="display: flex; align-items: stretch; gap: 0;">
+        <div style="display: flex; flex-direction: column; gap: 7px; justify-content: center; padding-right: 18px; max-width: 132px;">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: oklch(0.97 0.004 250);">incident text</div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: oklch(0.60 0.012 250); line-height: 1.4;">free-text alert, no URN</div>
+        </div>
+        <div style="display: flex; align-items: center; color: oklch(0.45 0.014 255); font-size: 22px; padding-right: 12px;">→</div>
+        <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; flex: 1;">
+          <sc-for list="{{ phases }}" as="p" hint-placeholder-count="6">
+            <div style="border: 1px solid oklch(0.34 0.014 255); background: oklch(0.235 0.012 255); padding: 14px 12px; display: flex; flex-direction: column; gap: 9px; min-height: 118px;">
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: oklch(0.52 0.014 255);">{{ p.num }}</div>
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 500; color: oklch(0.97 0.004 250); letter-spacing: -0.01em;">{{ p.name }}</div>
+              <div style="font-size: 12px; line-height: 1.35; color: oklch(0.66 0.012 250); text-wrap: pretty;">{{ p.note }}</div>
+              <div style="margin-top: auto; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(0.58 0.012 250);">{{ p.actor }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <div style="flex: 1; height: 1px; background: oklch(0.32 0.014 255);"></div>
+        <div style="border: 1px solid oklch(0.78 0.15 68); color: oklch(0.85 0.13 68); font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; padding: 9px 18px;">human gate — approve / reject</div>
+        <div style="flex: 1; height: 1px; background: oklch(0.32 0.014 255);"></div>
+      </div>
+
+      <div style="display: flex; align-items: stretch; gap: 10px;">
+        <sc-for list="{{ tail }}" as="t" hint-placeholder-count="2">
+          <div style="flex: 1; border: 1px solid oklch(0.34 0.014 255); background: oklch(0.235 0.012 255); padding: 14px 16px; display: flex; align-items: center; gap: 16px;">
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 500; color: oklch(0.97 0.004 250); min-width: 96px;">{{ t.name }}</div>
+            <div style="font-size: 12.5px; color: oklch(0.66 0.012 250); flex: 1; text-wrap: pretty;">{{ t.note }}</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(0.58 0.012 250);">{{ t.actor }}</div>
+          </div>
+        </sc-for>
+        <div style="border: 1px dashed oklch(0.75 0.11 210); color: oklch(0.78 0.11 210); padding: 14px 18px; display: flex; align-items: center; font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; max-width: 250px; line-height: 1.4;">↺ feeds the next run's recall</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.55 0.01 250);">03 — memory.png · 1280×400</div>
+    <div id="art-memory" data-screen-label="Cold vs warm" style="width: 1280px; height: 400px; background: oklch(0.19 0.012 255); box-sizing: border-box; padding: 40px 48px; display: flex; flex-direction: column; gap: 30px;">
+      <div style="display: flex; align-items: baseline; gap: 16px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: oklch(0.78 0.15 68);">memory pays for itself</div>
+        <div style="font-size: 15px; color: oklch(0.68 0.012 250);">The same incident, twice. One DataHub tool call per tick.</div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 26px;">
+        <sc-for list="{{ runs }}" as="r" hint-placeholder-count="2">
+          <div style="display: flex; align-items: center; gap: 26px;">
+            <div style="min-width: 190px; display: flex; flex-direction: column; gap: 5px;">
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 19px; font-weight: 500; color: oklch(0.97 0.004 250);">{{ r.label }}</div>
+              <div style="font-size: 12.5px; color: oklch(0.64 0.012 250); line-height: 1.35;">{{ r.note }}</div>
+            </div>
+            <div style="flex: 1; display: flex; align-items: flex-end; gap: 5px; height: 62px;">
+              <sc-for list="{{ r.ticks }}" as="tick" hint-placeholder-count="29">
+                <div style="flex: 1; height: 100%; background: {{ tick }};"></div>
+              </sc-for>
+            </div>
+            <div style="min-width: 96px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 40px; font-weight: 500; letter-spacing: -0.03em; color: oklch(0.97 0.004 250);">{{ r.count }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="margin-top: auto; display: flex; align-items: center; gap: 22px; border-top: 1px solid oklch(0.30 0.014 255); padding-top: 22px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 34px; font-weight: 600; color: oklch(0.78 0.15 68); letter-spacing: -0.02em;">−25%</div>
+        <div style="font-size: 14.5px; color: oklch(0.70 0.012 250); max-width: 900px; line-height: 1.45; text-wrap: pretty;">The warm run's <span style="font-family: 'IBM Plex Mono', monospace; color: oklch(0.95 0.004 250);">recall</span> phase finds the postmortem the cold run wrote and goes straight to the suspect ancestor. Single pair of runs, one catalog — see <span style="font-family: 'IBM Plex Mono', monospace; color: oklch(0.78 0.11 210);">examples/02-cold-vs-warm</span>.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1376,&quot;height&quot;:1400}}">
+class Component extends DCLogic {
+  renderVals() {
+    const cold = "oklch(0.42 0.02 255)";
+    const warm = "oklch(0.78 0.15 68)";
+    const dim = "oklch(0.26 0.012 255)";
+    return {
+      phases: [
+        { num: "01", name: "intake", note: "Parse the free-text alert into an asset guess", actor: "LLM" },
+        { num: "02", name: "resolve", note: "Search the catalog for the real URN", actor: "agent" },
+        { num: "03", name: "recall ★", note: "Retrieve postmortems past runs wrote", actor: "agent" },
+        { num: "04", name: "impact", note: "Walk lineage, score the blast radius", actor: "agent" },
+        { num: "05", name: "root_cause", note: "Ranked hypotheses, each citing URNs", actor: "agent" },
+        { num: "06", name: "propose", note: "Mutation plan grounded in seen URNs", actor: "LLM" }
+      ],
+      tail: [
+        { name: "commit", note: "Applies the approved mutations, logs every one to a JSONL audit trail", actor: "code" },
+        { name: "learn ★", note: "Saves the postmortem as a DataHub document — every row, every owner URN", actor: "code" }
+      ],
+      runs: [
+        { label: "cold run", note: "no memory in the catalog", count: "20", ticks: Array.from({ length: 20 }, () => cold) },
+        { label: "warm run", note: "recall finds the postmortem", count: "15", ticks: Array.from({ length: 20 }, (_, i) => (i < 15 ? warm : dim)) }
+      ]
+    };
+  }
+}
+
+</script>
+</body>
+</html>

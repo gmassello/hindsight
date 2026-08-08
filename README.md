@@ -1,286 +1,233 @@
-# Hindsight
+<p align="center">
+  <img src="docs/assets/hero.webp" alt="Hindsight — the on-call agent for your data platform" width="100%">
+</p>
 
-> **Your dashboard has been wrong since 03:00.** Hindsight already knows what broke it, who it hits, and writes the answer back into the catalog — so the next incident starts where this one ended.
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-3b82a0.svg?style=flat-square" alt="License"></a>
+  <a href="backend/pyproject.toml"><img src="https://img.shields.io/badge/python-3.13-3b82a0.svg?style=flat-square" alt="Python 3.13"></a>
+  <img src="https://img.shields.io/badge/DataHub-MCP%20%2B%20GraphQL-e39a3c?style=flat-square" alt="DataHub MCP + GraphQL">
+  <img src="https://img.shields.io/badge/write--back-verified%20via%20GraphQL-e39a3c?style=flat-square" alt="Write-back verified through a second channel">
+</p>
 
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-[![Python](https://img.shields.io/badge/python-3.13-blue.svg)](backend/pyproject.toml)
+---
 
-**[The memory loop, measured](examples/02-cold-vs-warm/) · [Five captured runs](examples/) · [The workflow as a portable Skill](.agents/skills/datahub-incident-triage/) · [Proposed upstream](https://github.com/datahub-project/datahub-skills/pull/110)**
+**Your dashboard has been wrong since 03:00.** Hindsight already knows what broke it, who it hits, and writes the answer back into the catalog — so the next incident starts where this one ended.
 
-The on-call agent for your data platform. When something breaks, Hindsight walks the DataHub lineage graph to compute who is affected, proposes a root cause backed by incidents you already solved, and writes the postmortem back into DataHub.
+It takes a free-text alert, walks the DataHub lineage graph to rank who is affected, proposes a root cause backed by incidents you already solved, and files the postmortem *inside DataHub*. Built for the [Build with DataHub: The Agent Hackathon](https://datahub.devpost.com/), track *Agents That Do Real Work*.
 
-Built for the [Build with DataHub: The Agent Hackathon](https://datahub.devpost.com/) — track _Agents That Do Real Work_: agents that **read** DataHub to understand what is connected to what, **take action**, and **write the results back**.
+<table>
+<tr>
+<td width="33%"><b>Read</b><br>Multi-hop lineage both directions, schema, query history — and the postmortems previous runs left behind.</td>
+<td width="33%"><b>Act</b><br>Deterministic blast-radius scoring, ranked hypotheses that must cite a URN a tool actually returned, and a mutation plan with a rationale per change.</td>
+<td width="33%"><b>Write back</b><br>Tags, an incident banner, ownership, and a postmortem document — all in the catalog, not a side database.</td>
+</tr>
+</table>
 
-![A recorded investigation replayed: evidence timeline, ranked blast radius, the approval gate, and the mutations landing in DataHub](docs/media/replay.gif)
+### An agent that reports its own success proves nothing
 
-## Every claim, and where to check it
-
-Every number in this README comes from a file in this repository.
-
-| Claim | Evidence |
-| --- | --- |
-| 13 MCP tools, read **and** mutation, multi-hop lineage in both directions | [`02-cold-vs-warm/cold/timeline.md`](examples/02-cold-vs-warm/cold/timeline.md) — 20 tool calls on a cold run, 29 consumers |
-| Blast radius ranked by a deterministic formula, with the owner list to page | [`02-cold-vs-warm/cold/blast-radius.md`](examples/02-cold-vs-warm/cold/blast-radius.md) — total score 30.08, 14 deduplicated owners |
-| Memory pays for itself: the same incident costs **20 tool calls cold and 15 warm** | [`02-cold-vs-warm/`](examples/02-cold-vs-warm/) |
-| Five runs against a live catalog, four of them written by `--report` and the fifth transcribed by hand | [`examples/`](examples/) |
-| The procedure runs with **no Hindsight code in the loop** — same URN, converging root cause, the same 14 owner URNs | [`04-skill-portability/`](examples/04-skill-portability/) |
-| Every captured run ships its raw event stream, replayable with **no DataHub and no API key** | `hindsight replay examples/01-schema-drift` over [`events.json`](examples/01-schema-drift/events.json) |
-| The write-back is **re-read from DataHub through a different API than the one that wrote it** | [`01-schema-drift/verify.txt`](examples/01-schema-drift/verify.txt) — `verified 5/5` |
-| The skill is proposed upstream to the official DataHub skills repo | [datahub-project/datahub-skills#110](https://github.com/datahub-project/datahub-skills/pull/110) |
-
-## The closed loop
-
-Every investigation makes the next one smarter, and that knowledge lives **inside DataHub**, not in a side database:
-
-1. **Read** — multi-hop lineage traversal, schema inspection, query history, and the postmortems previous runs stored as DataHub documents.
-2. **Act** — blast-radius scoring, ranked root-cause hypotheses with cited evidence, an action plan with a rationale per mutation.
-3. **Write back** — the mutations below, applied to the catalog itself.
-
-A later run even benefits from the write-back directly: an ancestor already tagged `hindsight-degraded` is evidence for the _upstream incident_ hypothesis — the system reads its own past actions.
-
-### What gets written, and who inherits it
-
-| Mutation | Where it lands in DataHub | Who inherits it |
-| --- | --- | --- |
-| `add_tags` `hindsight-degraded` | Tags on the broken asset | Anyone who searches or opens the asset — and the next Hindsight run, which reads the tag as evidence for the _upstream incident_ hypothesis |
-| `add_tags` `hindsight-impacted` | Tags on the highest-scoring consumers | Downstream owners, through the search facets |
-| `update_description` | An incident banner at the top of the asset description | Every consumer who opens the asset in the UI |
-| `add_owners` | Ownership on an ungoverned asset in the incident path | The governance backlog, permanently |
-| `set_domains` | Domain assignment | Same — implemented, but never triggered in the captured runs (see [Honest limits](#honest-limits)) |
-| `save_document` | A postmortem document in the catalog | The **next** investigation's `recall` phase |
-
-Not a mock-up — this is DataHub's own UI rendering what the agent wrote:
-
-| The tag and the incident banner | The postmortem in the catalog |
-| --- | --- |
-| [![hindsight-degraded on the broken asset](docs/media/datahub-tag.png)](docs/media/datahub-tag.png) | [![The postmortem document](docs/media/datahub-postmortem.png)](docs/media/datahub-postmortem.png) |
-
-![The incident banner inside the asset description](docs/media/datahub-banner.png)
-
-### vs. what DataHub already does
-
-| DataHub gives you | Hindsight adds |
-| --- | --- |
-| Impact Analysis lists downstream entities | A ranking over them by a deterministic impact score, and the deduplicated owner list you actually have to page |
-| A lineage graph you can walk by hand | An agent that walks it in both directions from a free-text alert and cites the URNs behind each hypothesis |
-| Documents you can write | A postmortem the next investigation *retrieves and acts on* — memory, not documentation |
-
-![The blast radius, ranked by impact score, with the deduplicated owner list](docs/media/ui-investigation.png)
-
-## Architecture
-
-```
- incident text ──► intake ──► resolve ──► recall ★ ──► impact ──► root_cause ──► propose
-                  (LLM)      (agent)     (agent)      (agent)     (agent)       (LLM)
-                                                                                  │
-                                                                          [ human gate ]
-                                                                                  │
-                                          learn ★ ◄─────────────── commit ◄───────┘
-                                         (code)                    (code)
-```
-
-### Design decisions
-
-- **Deterministic phase pipeline, not a free ReAct loop.** The orchestrator picks the phase; the LLM interprets the results. Each phase emits timeline events and can be tested in isolation, and non-critical phases fail into "continue with partial information" instead of killing the run.
-- **Per-phase toolsets.** Investigation phases (1–4) only ever see read tools; mutation tools exist only in `commit`/`learn`. The model cannot write while it should be reading.
-- **Memory before investigation.** `recall` runs _before_ `impact`/`root_cause`, and what it retrieves becomes `investigation_hints` that direct where the root-cause search looks first. Memory steers the investigation instead of decorating it.
-- **All math and writes are code.** The LLM reports facts; the score is a formula and the mutations are executed by code with an audit log. `impact(consumer) = type_weight × 1/(1+hops) × owner/criticality/domain multipliers`.
-- **Human gate by default.** The agent can run autonomously (`--auto-approve`), but the default is a dry-run plan awaiting explicit approval. Every applied mutation is recorded in a JSONL audit log with timestamp, tool, URN, args and rationale.
-- **Grounded mutations only.** `propose` sees the live mutation schemas and a whitelist of the URNs the investigation actually saw. A mutation it cannot ground in a real URN is dropped, not guessed.
-- **Grounded hypotheses only, and a verdict that can decline.** Every hypothesis must cite a URN a tool actually returned; naming an external system the catalog does not contain is a guess, not a finding. `root_cause` returns a verdict alongside the ranked hypotheses — `probable_cause`, `insufficient_evidence` or `exonerated` — and an `exonerated` verdict forces the action plan empty in code, not by asking the model nicely. See [Honest limits](#honest-limits) for how often that last one has actually fired.
-- **MCP first, GraphQL fallback.** DataHub access goes through the official [`mcp-server-datahub`](https://github.com/acryldata/mcp-server-datahub) (stdio, mutations enabled). If a mutation tool is missing or fails, the same mutation is applied through the GMS GraphQL API.
-
-Every mutation, with the URN and the rationale, waiting for a human — nothing has been written yet:
-
-![The dry-run plan at the approval gate](docs/media/ui-action-plan.png)
-
-## Quickstart
-
-Prerequisites: Python 3.13+, [uv](https://docs.astral.sh/uv/), Node 20.19+ (for the web UI), a Gemini / Anthropic / Bedrock key, and Docker with at least 4 CPUs / 8 GB for the DataHub quickstart — on colima, `colima start --cpu 4 --memory 8`.
+So it doesn't. Two commands close that hole, and neither needs you to take the agent's word for it:
 
 ```bash
-# 1. Local DataHub with sample lineage
+cd backend && .venv/bin/hindsight verify ../examples/01-schema-drift    # → verified 5/5
+```
+
+`verify` re-reads every mutation in a run's audit log straight from DataHub **through the GMS GraphQL API — not the MCP tools that wrote it** — and exits non-zero if anything is missing. It has already caught a real defect: [`examples/02-cold-vs-warm/cold/verify.txt`](examples/02-cold-vs-warm/cold/verify.txt) reports `verified 5/6`, and the failure is a second run silently overwriting the first one's incident banner. Every run had reported success. The failing file ships as it came out.
+
+```bash
+cd backend && .venv/bin/hindsight replay ../examples/02-cold-vs-warm/warm    # no DataHub, no API key
+```
+
+`replay` reprints a captured run from its raw event stream — [`events.json`](examples/02-cold-vs-warm/warm/events.json). Clone the repo and watch a real investigation without installing anything.
+
+<p align="center">
+  <img src="docs/media/replay.gif" alt="hindsight replay reprinting a captured investigation in the terminal" width="100%">
+</p>
+
+### Start here
+
+| | |
+| --- | --- |
+| **See the memory loop pay off** | [`examples/02-cold-vs-warm`](examples/02-cold-vs-warm) — the same incident, 20 tool calls cold vs. 15 warm |
+| **See it do real work** | [`examples/01-schema-drift`](examples/01-schema-drift) — 14 tool calls, 16 consumers, 10 owners paged, postmortem filed, `verified 5/5` |
+| **See it work without our code** | [`examples/04-skill-portability`](examples/04-skill-portability) — the same procedure as a portable Agent Skill, [proposed upstream](https://github.com/datahub-project/datahub-skills/pull/110) |
+
+---
+
+## The 60-second run
+
+```bash
+# 1. Local DataHub with sample lineage  (needs Docker: 4 CPU / 8 GB)
 uv tool install acryl-datahub
-datahub docker quickstart                       # UI at http://localhost:9002 (datahub/datahub)
-datahub datapack load showcase-ecommerce        # wait for the quickstart to report healthy first
+datahub docker quickstart                    # UI at localhost:9002 — datahub/datahub
+datahub datapack load showcase-ecommerce     # then WAIT — see the note below
 
 # 2. Backend
-cd backend
-uv sync
-cp ../.env.example .env                         # set GEMINI_API_KEY (or provider of choice)
+cd backend && uv sync
+cp ../.env.example .env                      # set GEMINI_API_KEY (or anthropic / bedrock)
 
-# 3. Investigate an incident
+# 3. Investigate
 .venv/bin/hindsight investigate \
   "orders table in order_entry_db is showing nulls in customer_id since 03:00 UTC today"
 ```
 
-The CLI streams the timeline, renders the mutations as a dry-run diff, and applies them once you approve. Open the asset in the DataHub UI to see the tags, the incident banner and the document.
+The CLI streams the timeline, renders the mutations as a dry-run diff, and applies them once you approve.
 
-Run it twice: the second run's `recall` phase finds the postmortem the first run wrote and starts from its conclusions.
+> **`datapack load` returns before the lineage graph exists.** Ingestion reports success in under a second while the index fills in for minutes. A run started too early produces a real-looking investigation with a blast radius that is quietly wrong.
 
-### Check that the agent actually wrote what it claims
+**Then run it again.** The second run's `recall` phase finds the postmortem the first one wrote and starts from its conclusions. That is the whole point.
 
-A writer that reports its own success proves nothing. `verify` re-reads every mutation in the run's
-audit log straight from DataHub — **through the GMS GraphQL API, not the MCP tools that wrote it** —
-and exits non-zero if anything is missing:
-
-```bash
-cd backend && .venv/bin/hindsight verify ../examples/01-schema-drift
-```
-
-### See a run without installing anything
-
-`--report <dir>` writes the raw event stream next to the markdown artifacts, and `replay` reprints it — no DataHub, no API key, no `.env`:
+<details>
+<summary><b>Web UI, Docker and the API</b></summary>
 
 ```bash
-cd backend && .venv/bin/hindsight replay ../examples/02-cold-vs-warm/cold
+cd backend && .venv/bin/hindsight serve      # FastAPI on :8000
+cd frontend && npm install && npm run dev    # Vite on :5173
 ```
 
-### Web UI
+A single-page React app: submit an incident, watch the evidence timeline stream over SSE while panels fill in per phase — resolved asset, "we've seen this before", ranked blast radius, hypotheses with confidence bars, and the action plan as a diff with **Approve / Reject**. Set `VITE_API_URL` in `frontend/.env` if the API is elsewhere.
 
-```bash
-# terminal 1
-cd backend && .venv/bin/hindsight serve         # FastAPI on :8000
-
-# terminal 2
-cd frontend && npm install && npm run dev       # Vite on http://localhost:5173
-```
-
-Single-page React app: submit an incident and watch the evidence timeline stream live over SSE while the panels fill in as each phase completes — resolved asset, "we've seen this before" (memory), blast radius ranked by impact score, root-cause hypotheses with confidence bars, and the proposed action plan rendered as a diff with **Approve / Reject** buttons (the human gate). After approval, each mutation shows its commit result and the postmortem reference.
-
-If the API runs elsewhere, set `VITE_API_URL` in `frontend/.env` (defaults to `http://localhost:8000`).
-
-### One-command bring-up (Docker)
-
-With DataHub quickstart already running (step 1 above):
+One command instead, with the DataHub quickstart already up:
 
 ```bash
 GEMINI_API_KEY=<your-key> docker compose up --build
 ```
 
-Backend on `http://localhost:8000`, frontend on `http://localhost:5173`. The backend container reaches the host's DataHub through `host.docker.internal:8080`, so no compose changes are needed on macOS or Linux.
+API surface: `POST /investigations` · `GET /investigations/{id}/stream` (SSE, up to the human gate) · `POST /investigations/{id}/approve` · `POST /investigations/{id}/reject`.
 
-### API server
+Prerequisites: Python 3.13+, [uv](https://docs.astral.sh/uv/), Node 20.19+. On colima, `colima start --cpu 4 --memory 8`. Every knob is in [`docs/configuration.md`](docs/configuration.md).
 
-```bash
-.venv/bin/hindsight serve                       # FastAPI on :8000
-```
+</details>
 
-- `POST /investigations` `{"text": "..."}` → create
-- `GET /investigations/{id}/stream` → SSE timeline, up to the human gate
-- `POST /investigations/{id}/approve` → commit + learn
-- `POST /investigations/{id}/reject`
+---
 
-## Configuration
+## What it actually leaves behind
 
-| Variable                 | Default                  | Purpose                                                                       |
-| ------------------------ | ------------------------ | ----------------------------------------------------------------------------- |
-| `DATAHUB_GMS_URL`        | `http://localhost:8080`  | GMS endpoint                                                                  |
-| `DATAHUB_GMS_TOKEN`      | empty                    | PAT; empty works with quickstart (auth disabled)                              |
-| `DATAHUB_MCP_URL`        | empty                    | Streamable-HTTP MCP endpoint (DataHub Cloud); empty spawns local stdio server |
-| `DATAHUB_MCP_COMMAND`    | `uvx mcp-server-datahub` | Command for the stdio MCP server                                              |
-| `LLM_PROVIDER`           | `gemini`                 | `gemini` \| `anthropic` \| `bedrock`                                          |
-| `HINDSIGHT_AUTO_APPROVE` | `false`                  | Skip the human gate                                                           |
-| `HINDSIGHT_MAX_HOPS`     | `3`                      | Downstream lineage depth suggested to `impact` — a prompt hint, not a cut-off |
-| `PHASE_MAX_TURNS`        | `12`                     | LLM turn budget per phase                                                     |
-| `AUDIT_LOG_PATH`         | `var/audit-log.jsonl`    | Mutation audit log                                                            |
+Not a mock-up — DataHub's own UI after a run, and the app driving it.
 
-## Demo scenarios
+<table>
+<tr>
+<td width="50%"><img src="docs/media/datahub-tag.png" alt="hindsight-degraded tag on the broken asset in DataHub"><br><sub><b>The tag.</b> <code>hindsight-degraded</code> on the broken asset — and evidence for the next run's upstream-incident hypothesis.</sub></td>
+<td width="50%"><img src="docs/media/datahub-banner.png" alt="Incident banner at the top of the asset description in DataHub"><br><sub><b>The banner.</b> Every consumer who opens the asset sees the incident at the top of the description.</sub></td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/media/datahub-postmortem.png" alt="Postmortem document stored in the DataHub catalog"><br><sub><b>The postmortem.</b> A catalog document, not a side database — this is what <code>recall</code> retrieves next time.</sub></td>
+<td width="50%"><img src="docs/media/ui-action-plan.png" alt="Proposed action plan rendered as a diff with Approve and Reject"><br><sub><b>The human gate.</b> The plan as a dry-run diff, with a rationale per mutation.</sub></td>
+</tr>
+</table>
 
-`scenarios/scenarios.yaml` defines three reproducible scenarios; `examples/` holds five captured runs across four directories, each with its input, timeline, blast radius, postmortem and audit log. Four were written by `hindsight investigate ... --report <dir>`; the fifth is a run of the Skill alone, transcribed by hand:
+<details>
+<summary>The live investigation view</summary>
 
-1. [`01-schema-drift`](examples/01-schema-drift/) — a simulated upstream migration (`scenarios/break_schema.py`) drops the `customer_id` NOT NULL constraint; with six seeded postmortems in memory, `recall` points at the Spark ingestion job and the agent converges there in **14 tool calls**, tags the degraded and impacted assets, and saves the postmortem.
-2. [`02-cold-vs-warm`](examples/02-cold-vs-warm/) ★ — the same incident twice. The cold run investigates from scratch (**20 DataHub tool calls**, 29 consumers); the warm run's `recall` phase retrieves the postmortem the cold run just wrote and goes straight to the suspect ancestor (**15 calls, 25% fewer**). The two timelines sit side by side.
-3. [`03-orphaned-asset`](examples/03-orphaned-asset/) — a stale table nobody owns and nobody consumes: besides the incident actions, the agent assigns `add_owners` to close the governance gap.
-4. [`04-skill-portability`](examples/04-skill-portability/) — scenario 1 re-run by the Skill alone, with no Hindsight code in the loop. See below.
+<img src="docs/media/ui-investigation.png" alt="Evidence timeline streaming over SSE while result panels fill in per phase" width="100%">
 
-`scenarios/seed_incidents.py` loads six resolved historical postmortems into DataHub documents so `recall` has memory to work with.
+</details>
+
+---
+
+## How it works
+
+![The phase pipeline: intake, resolve, recall, impact, root_cause, propose, human gate, commit, learn](docs/assets/pipeline.webp)
+
+Five decisions carry the design:
+
+- **Memory before investigation.** `recall` runs *before* `impact` and `root_cause`, and what it finds becomes `investigation_hints` that steer where the search looks first. Memory drives the investigation instead of decorating it.
+- **Per-phase toolsets.** Investigation phases only ever see read tools; mutation tools exist only in `commit`/`learn`. The model cannot write while it should be reading.
+- **All math and writes are code.** The LLM reports facts; the score is a formula and the mutations execute in code with an audit log. `impact(consumer) = type_weight × 1/(1+hops) × owner/criticality/domain multipliers`.
+- **Grounded hypotheses, and a verdict that can decline.** Every hypothesis must cite a URN a tool actually returned. An `exonerated` verdict forces the action plan empty *in code*, not by asking the model nicely.
+- **Grounded mutations only.** `propose` sees the live mutation schemas and a whitelist of URNs the investigation saw. A mutation it cannot ground in a real URN is dropped, not guessed.
+
+Plus a human gate by default (`--auto-approve` opts out), a deterministic state machine rather than a free ReAct loop, and MCP-first DataHub access via [`mcp-server-datahub`](https://github.com/acryldata/mcp-server-datahub) with a GMS GraphQL fallback per mutation. Full rationale in [`docs/design.md`](docs/design.md).
+
+---
+
+## Why memory is the feature
+
+![Cold run: 20 DataHub tool calls, 29 consumers swept. Warm run: 15 calls, 6 consumers. 25% fewer calls.](docs/assets/memory.webp)
+
+A later run benefits from the write-back directly: an ancestor already tagged `hindsight-degraded` is *evidence* for the upstream-incident hypothesis. The system reads its own past actions.
+
+And it is not free. The warm run was cheaper **and narrower** — 6 consumers swept against the cold run's 29. Both converged on the same ancestor, but a warm run trusts memory instead of re-deriving the blast radius. That tradeoff is the honest version of this graph.
+
+### What gets written, and who inherits it
+
+| Mutation | Where it lands | Who inherits it |
+| --- | --- | --- |
+| `add_tags` `hindsight-degraded` | Tags on the broken asset | Anyone who opens or searches it — and the next run, as evidence |
+| `add_tags` `hindsight-impacted` | Tags on the top-scoring consumers | Downstream owners, through search facets |
+| `update_description` | Incident banner atop the asset description | Every consumer who opens the asset in the UI |
+| `add_owners` | Ownership on an ungoverned asset in the path | The governance backlog, permanently |
+| `set_domains` | Domain assignment | Implemented, never triggered — see [Honest limits](#honest-limits) |
+| `save_document` | A postmortem document in the catalog | The **next** investigation's `recall` phase |
+
+### Not what DataHub already gives you
+
+| DataHub gives you | Hindsight adds |
+| --- | --- |
+| Impact Analysis lists downstream entities | A ranking over them by a deterministic score, and the deduplicated owner list you actually have to page |
+| A lineage graph you can walk by hand | An agent that walks it both directions from a free-text alert and cites the URNs behind each hypothesis |
+| Documents you can write | A postmortem the next investigation *retrieves and acts on* — memory, not documentation |
+
+---
+
+## Every claim, and where to check it
+
+Every number above comes from a file in this repository.
+
+| Claim | Evidence |
+| --- | --- |
+| 13 MCP tools, read **and** mutation, multi-hop lineage both directions | [`02-cold-vs-warm/cold/timeline.md`](examples/02-cold-vs-warm/cold/timeline.md) — 20 tool calls, 29 consumers |
+| Blast radius ranked by a deterministic formula, with the owner list to page | [`02-cold-vs-warm/cold/blast-radius.md`](examples/02-cold-vs-warm/cold/blast-radius.md) — total score 30.08, 14 deduplicated owners |
+| The same incident costs **20 tool calls cold and 15 warm** — and sweeps 29 consumers vs. 6 | [`02-cold-vs-warm/`](examples/02-cold-vs-warm) |
+| Every mutation re-read through a **second channel**, GraphQL rather than the MCP tools that wrote it | [`01-schema-drift/verify.txt`](examples/01-schema-drift/verify.txt) — `verified 5/5` |
+| Verification catches what the agent misses | [`02-cold-vs-warm/cold/verify.txt`](examples/02-cold-vs-warm/cold/verify.txt) — `verified 5/6`, the banner overwritten |
+| Five runs against a live catalog across four directories | [`examples/`](examples) |
+| The procedure runs with **no Hindsight code in the loop** — same URN, converging root cause, **the same fourteen owners, set for set** | [`04-skill-portability/`](examples/04-skill-portability) |
+| The skill is proposed upstream to the official DataHub skills repo | [datahub-project/datahub-skills#110](https://github.com/datahub-project/datahub-skills/pull/110) |
+
+<details>
+<summary><b>The five captured runs, one row each</b></summary>
+
+`scenarios/scenarios.yaml` defines three reproducible scenarios; `examples/` holds five captured runs across four directories, each with its input, timeline, blast radius, postmortem and audit log. Four were written by `hindsight investigate ... --report <dir>` and ship their raw event stream; the fifth is a run of the Skill alone, transcribed by hand.
+
+| Run | Tool calls | Consumers | Impact score | Deduped owners | `verify` |
+| --- | --- | --- | --- | --- | --- |
+| `01-schema-drift` | 14 | 16 | 17.0 | 10 | `verified 5/5` |
+| `02-cold-vs-warm/cold` | 20 | 29 | 30.08 | 14 | `verified 5/6` |
+| `02-cold-vs-warm/warm` | 15 | 6 | 17.55 | 6 | `verified 8/9` |
+| `03-orphaned-asset` | 17 | 0 (leaf asset) | 0.0 | none | `verified 4/4` |
+| `04-skill-portability` | 9 investigation (14 total) | 30 | 26.23 | 14 | — |
+
+1. [`01-schema-drift`](examples/01-schema-drift) — a simulated upstream migration drops the `customer_id` NOT NULL constraint; the agent traces the nulls to a Postgres ancestor a previous run had already tagged `hindsight-degraded`.
+2. [`02-cold-vs-warm`](examples/02-cold-vs-warm) ★ — the same incident twice, timelines side by side.
+3. [`03-orphaned-asset`](examples/03-orphaned-asset) — a stale table nobody owns and nobody consumes; the agent assigns `add_owners` to close the governance gap.
+4. [`04-skill-portability`](examples/04-skill-portability) — scenario 1 re-run by the Skill alone, no Python in the loop.
+
+`scenarios/seed_incidents.py` loads six resolved historical postmortems so `recall` has memory to work with.
+
+</details>
+
+---
 
 ## The workflow as a portable Skill
 
-[`.agents/skills/datahub-incident-triage/`](.agents/skills/datahub-incident-triage/) distills this agent into an [Agent Skills](https://skills.sh) package: the same seven-step procedure — memory first, blast radius, ranked hypotheses, postmortem — as plain instructions, with no Python involved. Any Agent-Skills-compatible CLI with DataHub connected gets the behaviour without cloning this repo.
+[`.agents/skills/datahub-incident-triage/`](.agents/skills/datahub-incident-triage) distills the agent into an [Agent Skills](https://skills.sh) package: the same seven-step procedure as plain instructions, no Python. Any Agent-Skills CLI with DataHub connected gets the behaviour without cloning this repo.
 
-It is written against the same DataHub MCP tool names Hindsight uses, with `datahub` CLI fallbacks, and follows the conventions of [`datahub-project/datahub-skills`](https://github.com/datahub-project/datahub-skills).
+It has been run end to end — [`examples/04-skill-portability`](examples/04-skill-portability) reaches **the same fourteen owners, set for set**, and names scenario 1's conclusion as its own second hypothesis. Caveats and the three defects verification surfaced are documented there.
 
-It has been executed end to end: [`examples/04-skill-portability`](examples/04-skill-portability/) is the captured run of an agent following the skill alone, reaching **the same fourteen owner URNs** — set for set — as the cold run of the same incident in scenario 2. It was a warm run; the caveats and the three defects the verification surfaced are documented there.
-
-## Notes from the build
-
-Things that cost hours against a real DataHub and a real model, written down so they cost you minutes:
-
-- **Gemini rejects `$ref`/`$defs` and unknown keys in function declarations.** All the normalization — ref inlining, key dropping, type uppercasing — lives in one place, `llm/gemini_provider.py::_clean_schema`, because splitting it across layers produces schemas that are valid at each step and invalid at the end. The trap inside the trap: a property legitimately *named* `title` under `properties` has to survive the same pass that drops `title` as schema metadata.
-- **`MAX_TOKENS` is 16384 for a reason.** A `submit_*` payload carrying 30 consumers with full URNs blows past anything smaller, and the failure mode is the model going silent halfway through a JSON object rather than an explicit error.
-- **`save_document` needs a `document_type` from a server-defined enum** (`Analysis`, `Note`, …). Read it from the live schema; a guessed value is a rejected write — `learn` reads the enum at runtime.
-- **The MCP server hides the document tools entirely when the catalog has zero documents.** `recall` has to treat their absence as a cold start rather than an error, or the very first run against a fresh install fails on the phase that is supposed to find nothing.
-- **`grep_documents` takes a `urns` argument** — it narrows an existing result set, it does not search the catalog. And `get_lineage_paths_between` takes `source_urn`/`target_urn`, not `upstream_urn`/`downstream_urn`. Both were guessed once and both cost a wasted turn — see [`examples/04-skill-portability`](examples/04-skill-portability/).
-- **`datahub datapack load` returns before the lineage graph exists.** The ingestion reports success in under a second, but the graph index fills in asynchronously for minutes afterwards: `get_lineage` on the same URN returned a handful of consumers and then 37. A run started too early produces a real-looking investigation with a blast radius that is quietly wrong. Poll `searchAcrossLineage` until the count stops growing before capturing anything. (The `--restore-indices` job in the 1.7.0 quickstart is not the fix — it dies on an unresolved `DATAHUB_SYSTEM_CLIENT_SECRET`. Waiting is.)
-- **Two runs against the same asset silently overwrite each other's incident banner.** `verify`
-  found this, not us: [`02-cold-vs-warm/cold/verify.txt`](examples/02-cold-vs-warm/cold/verify.txt)
-  reports `verified 5/6`, and the one failure is the banner the cold run appended — scenario 1 ran
-  later against the same table and its `update_description` replaced the whole field instead of
-  appending to it. Every run had reported success. This is the entire argument for verifying the
-  write-back through a second channel, and it is why the failing `verify.txt` ships as it came out.
-- **An agent that summarises its own postmortem quietly breaks the memory loop.** `grep_documents` matches literal text, so a prose summary of a blast radius is a document the next investigation cannot use. The postmortem has to carry every row, every owner URN and the largest hop count actually observed. This one was found by running the Skill end to end — see [`examples/04-skill-portability`](examples/04-skill-portability/).
+---
 
 ## Honest limits
 
-- **The phase prompts are not covered by tests.** Everything listed under [Tests](#tests) is; the prompts themselves are verified only by the captured runs in `examples/`.
-- **Every number in `examples/` comes from a single run.** The cold-vs-warm delta (20 → 15 tool calls) is one pair against one catalog, not a repeated measurement with a variance.
-- **Memory buys speed, and in this pair it also cost coverage.** The warm run reached the same conclusion in fewer calls, but its blast radius swept 6 consumers where the cold run swept 29: steered straight at the suspect, it explored less. Fewer calls is not free.
-- **The `propose` phase is not deterministic.** Running scenario 3 twice on the same catalog produced `add_owners` once and not the other time, on an asset that demonstrably had no owner. The captured run is the one that proposed it; the run that did not is a real failure mode, not an artefact.
-- **Hindsight does not detect incidents.** It receives an alert and investigates it. Monitoring is one of the six things ruled out on purpose in [`docs/design.md`](docs/design.md) §3.
-- **The API keeps investigations in an in-memory dict**, with no auth and no persistence. Restarting `hindsight serve` loses them. This is a demo, not a SaaS.
-- **`exonerated` has never fired, and the reason is the catalog.** `root_cause` can return three
-  verdicts — `probable_cause`, `insufficient_evidence`, `exonerated` — and when the verdict is
-  `exonerated` the action plan is forced empty: no tags, no banner, not even the governance
-  mutations. It has never happened in a captured run. Four attempts at a negative-control scenario
-  all came back with a cause, and the honest diagnosis is that **exonerating requires evidence of
-  health and this catalog carries none**: the `showcase-ecommerce` datapack has no freshness
-  timestamps, no row counts and no job run history. The agent can confirm a schema is intact and
-  that no ancestor is tagged degraded, but "the pipeline is fine" is not a statement this metadata
-  can support. Two of those attempts were also informative in their own right: on `inventories` the
-  agent kept blaming an upstream warehouse system, and it was right to — the datapack ships a
-  runbook that names exactly that failure mode for exactly that table.
-- **`set_domains` has never fired.** It is implemented, but the prompt forbids inventing a domain URN and no captured run retrieved one — domain URNs in this catalog are UUIDs. Scenario 3 therefore ships demonstrating the owner half of the governance gap.
-- **Nothing here has been run against a second catalog** — one warehouse, one datapack (`showcase-ecommerce`).
-
-## Project layout
-
-```
-backend/src/hindsight/
-├── agent/
-│   ├── orchestrator.py     # phase state machine, graceful degradation
-│   ├── phase_agent.py      # generic LLM-with-tools loop (premature-submit guard, turn budget)
-│   ├── context.py          # the Ctx phases mutate
-│   └── phases/             # intake, resolve, recall ★, impact, root_cause, propose, commit, learn ★
-├── datahub/
-│   ├── mcp_client.py       # MCP session (stdio or HTTP), read/write tool split via annotations
-│   ├── graphql_fallback.py # GMS GraphQL: mutation fallback, and the channel `verify` reads through
-│   └── lineage.py          # deterministic blast-radius scoring
-├── llm/                    # provider-agnostic layer: gemini / anthropic / bedrock + structured output
-├── memory/postmortem.py    # postmortem markdown rendering
-├── safety/                 # dry-run rendering + JSONL audit log
-├── api/                    # FastAPI + SSE
-└── cli.py                  # `hindsight investigate` / `replay` / `verify` / `serve`
-
-frontend/src/
-├── useInvestigation.ts     # all state + SSE lifecycle in one hook
-├── App.tsx                 # layout: live timeline | progressive result panels
-├── api.ts, types.ts        # fetch client and the SSE contract
-└── components/             # IncidentInput, Timeline, ResolvedAsset, RecallPanel,
-                            # BlastRadius, HypothesesPanel, PlanPanel
-
-scenarios/                  # seed_incidents.py, break_schema.py, scenarios.yaml
-examples/                   # five captured runs; 04 is not in scenarios.yaml
-.agents/skills/             # datahub-incident-triage: this workflow as a portable Agent Skill
-.claude/skills →            # symlink to .agents/skills/, so Claude Code discovers them in this repo
-AGENTS.md                   # agent instructions for this repo; CLAUDE.md just imports it
-docker-compose.yml          # backend + frontend against an external DataHub quickstart
-```
-
-The frontend is deliberately dependency-free beyond React: native `EventSource` for streaming, plain CSS for the theme, no router or state library.
-
-[`docs/design.md`](docs/design.md) is the design document frozen before implementation — useful for the *why*, but it describes what was planned. This file describes what was built; [`SUBMISSION.md`](SUBMISSION.md) tracks delivery status.
+- **The phase prompts are not covered by tests.** Everything under [Tests](#tests) is; the prompts are verified only by the captured runs.
+- **Every number in `examples/` comes from a single run.** 20 → 15 is one pair against one catalog, not a measurement with a variance.
+- **Memory bought speed and cost coverage.** The warm run swept 6 consumers where the cold run swept 29. Faster is not the same as more thorough.
+- **`propose` is not deterministic.** Scenario 3 run twice produced `add_owners` once and not the other time, on an asset that demonstrably had no owner.
+- **The `exonerated` verdict has never fired.** Exonerating requires evidence of *health*, and this catalog carries no freshness timestamps, no row counts and no job run history. The verdict is implemented and untriggerable here.
+- **Two runs against the same asset overwrite each other's incident banner.** Found by `verify`, not by the author — [`02-cold-vs-warm/cold/verify.txt`](examples/02-cold-vs-warm/cold/verify.txt), `verified 5/6`.
+- **Hindsight does not detect incidents.** It receives an alert and investigates it. Monitoring is one of the six items in the out-of-scope table of [`docs/design.md`](docs/design.md) §3, *Scope: what is in and what is out*.
+- **The API keeps investigations in an in-memory dict** — no auth, no persistence. Restarting loses them. This is a demo, not a SaaS.
+- **`set_domains` has never fired.** Implemented, but the prompt forbids inventing a domain URN and no run retrieved one — the domain URNs in this catalog are UUIDs.
+- **Nothing has run against a second catalog.** One warehouse, one datapack.
 
 ## Tests
 
@@ -290,7 +237,15 @@ cd backend
 .venv/bin/pytest
 ```
 
-Unit tests mock the LLM and the MCP client; the scoring formula, the phase loop guards, the Gemini schema normalization, the postmortem rendering, the report writer and the orchestrator's failure policy are covered.
+Unit tests mock the LLM and MCP client. Covered: the scoring formula, the phase loop guards, the Gemini schema normalization, postmortem rendering, the report writer, `verify`, `replay`, and the orchestrator's failure policy.
+
+## Deeper
+
+- [`docs/design.md`](docs/design.md) — the design doc frozen before implementation. Good for the *why*; it describes what was planned, this file describes what was built.
+- [`docs/notes-from-the-build.md`](docs/notes-from-the-build.md) — eight traps that cost hours against a real DataHub and a real model, written down so they cost you minutes.
+- [`docs/configuration.md`](docs/configuration.md) — every environment variable, and the repo layout.
+- [`SUBMISSION.md`](SUBMISSION.md) — delivery status.
+- [The overview page](https://gmassello.github.io/hindsight/landing/) — the same story on one page. The [interactive demo](https://gmassello.github.io/hindsight/) replays a captured run in the browser, no install.
 
 ## License
 

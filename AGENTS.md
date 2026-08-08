@@ -58,7 +58,7 @@ The frontend (`frontend/src/`) is a single-page React app with zero runtime deps
 
 ## Gotchas learned the hard way
 
-The runtime ones live in [`README.md` § Notes from the build](README.md#notes-from-the-build) — Gemini schema cleaning (and the `_DROP_KEYS` vs. a property actually named `title` trap), `MAX_TOKENS`, the `document_type` enum, the document tools the MCP server hides on an empty catalog, and the real signatures of `grep_documents` / `get_lineage_paths_between`. Read them before touching `llm/` or a phase's tool list.
+The runtime ones live in [`docs/notes-from-the-build.md`](docs/notes-from-the-build.md) — Gemini schema cleaning (and the `_DROP_KEYS` vs. a property actually named `title` trap), `MAX_TOKENS`, the `document_type` enum, the document tools the MCP server hides on an empty catalog, and the real signatures of `grep_documents` / `get_lineage_paths_between`, plus the `datapack load` indexing race and the incident-banner overwrite `verify` caught. Read them before touching `llm/` or a phase's tool list.
 
 Only in here:
 
@@ -68,5 +68,5 @@ Only in here:
 
 - Code, docs, prompts and user-facing strings in English; conversation with the user in Spanish.
 - The repo owner's global rules apply: no code comments, no JavaDocs-style docs, surgical diffs.
-- Scope discipline: the six things ruled out by design are listed in [`docs/design.md`](docs/design.md) §3.
+- Scope discipline: the out-of-scope table in [`docs/design.md`](docs/design.md) §3 *Scope: what is in and what is out* lists the six things ruled out by design.
 - Frontend: no new runtime dependencies (native `EventSource`/`fetch`, plain CSS, no router/state/chart libraries); no frontend test framework — `npm run build` is the gate.

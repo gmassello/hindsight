@@ -21,4 +21,4 @@ The honest reading of the fourth column: memory bought speed and cost coverage. 
 
 The memory lives inside DataHub (a document saved with `save_document`, retrieved with `search_documents`/`grep_documents`) — no side database. Every investigation makes the next one cheaper.
 
-Both runs ship their raw event stream. `hindsight replay examples/02-cold-vs-warm/cold` reprints the whole investigation with Docker off and no API key.
+Both runs ship their raw event stream. `cd backend && .venv/bin/hindsight replay ../examples/02-cold-vs-warm/cold` reprints the whole investigation with Docker off and no API key.

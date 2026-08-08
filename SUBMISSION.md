@@ -24,7 +24,7 @@ The track rewards agents that **read** DataHub, **act**, and **write back**. All
 - [x] Frontend: SSE timeline, blast radius, memory panel, approval gate
 - [x] End-to-end verification against local DataHub: cold run + approve (3 mutations + postmortem saved, see `examples/02-cold-vs-warm/cold/audit-log.json`), warm run recovering the previous postmortem, reject path
 - [x] LICENSE: Apache 2.0
-- [x] README: hero claim, claim→evidence table, architecture diagram, quickstart, design decisions, notes from the build, honest limits
+- [x] README: hero claim, claim→evidence table, architecture diagram, quickstart, design decisions, honest limits; the build notes moved to `docs/notes-from-the-build.md`
 - [x] `scenarios/` — `seed_incidents.py` (6 historical postmortems), `break_schema.py` (verified live: break + reset), `scenarios.yaml`
 - [x] `examples/` — **explicitly requested by the judges**: five runs across four directories, four of them written by `hindsight investigate ... --report <dir>`, each shipping its raw event stream (`events.json` + `state.json`) so `hindsight replay <dir>` reproduces the whole investigation with no DataHub and no API key
   - [x] `01-schema-drift/` — real run, 14 tool calls; with six seeded postmortems in memory, `recall` points at the Spark ingestion job and the agent converges there. It does **not** surface the planted `ALTER TABLE` note — the Skill run in `04-skill-portability` does, and that example says so
@@ -33,7 +33,7 @@ The track rewards agents that **read** DataHub, **act**, and **write back**. All
 - [x] `docker-compose.yml` — backend + frontend against external DataHub quickstart; smoke-tested
 - [x] Open source Skill written: `.agents/skills/datahub-incident-triage/` — Agent Skills format, portable to any compatible CLI (Claude Code, Cursor, Codex, Gemini CLI, …). Passes the target repo's lint (prettier + markdownlint) and its tool names match the ones verified in the `examples/` runs
 - [x] Skill verified end to end against live DataHub — an agent following only `SKILL.md`, with no backend code in the loop, reached a converging root cause and **the same 14 owner URNs, set for set**, as the cold Hindsight run of the same incident, in 9 investigation tool calls; applied 3 approved mutations and saved a postmortem that a re-search retrieved. Captured in [`examples/04-skill-portability/`](examples/04-skill-portability/), which also states the caveats (warm run against a cold comparison, audit log captured by hand). Verifying it surfaced three real defects in the skill, all fixed
-- [x] Clean-clone test: repo cloned from GitHub into a fresh directory works following only the README — `uv sync`, `ruff`, `pytest` (20 passed), `hindsight serve` answering on `:8000`, `npm ci` + `npm run build`. Ran without DataHub, so it covers install/lint/test/build, not an end-to-end investigation (`examples/` already carries that evidence). Surfaced three defects, all fixed: Node missing from the prerequisites, no Docker resource floor for the quickstart, and `Settings.env_file` resolving relative to the cwd — which meant the `scenarios/` scripts, invoked from the repo root, silently ignored `backend/.env`
+- [x] Clean-clone test: repo cloned from GitHub into a fresh directory works following only the README — `uv sync`, `ruff`, `pytest` (30 passed), `hindsight serve` answering on `:8000`, `npm ci` + `npm run build`. Ran without DataHub, so it covers install/lint/test/build, not an end-to-end investigation (`examples/` already carries that evidence). Surfaced three defects, all fixed: Node missing from the prerequisites, no Docker resource floor for the quickstart, and `Settings.env_file` resolving relative to the cwd — which meant the `scenarios/` scripts, invoked from the repo root, silently ignored `backend/.env`
 - [x] Open source Skill PR: [datahub-project/datahub-skills#110](https://github.com/datahub-project/datahub-skills/pull/110) — `feat: add datahub-incident-triage skill`. `Lint PR Title` green; the `Lint` workflow awaits first-time-contributor approval from a maintainer (pre-commit passes locally on the exact tree pushed). The PR link is enough, merge not required
 
 ### Pending
@@ -53,7 +53,7 @@ All six criteria weigh equally; each needs an explicit answer.
 | Criterion | Answer | Where the judges see it |
 |---|---|---|
 | Integration depth | 13 MCP tools (8 read, 5 mutation), multi-hop lineage, memory stored inside DataHub | Demo timeline + README claims table |
-| Technical quality | Deterministic phase pipeline, per-phase toolset, dry-run, tests, GraphQL fallback | README "Design decisions" + `backend/tests/` |
+| Technical quality | Deterministic phase pipeline, per-phase toolset, dry-run, tests, GraphQL fallback | README "How it works" + `backend/tests/` |
 | Originality | The memory loop: the system improves with use and the knowledge lives in DataHub | Scenario 2 in the video |
 | Real-world applicability | Data on-call: concrete, expensive pain, backed by first-hand experience | First 20 seconds of the video |
 | Delivery quality | `docker compose up` + README + `examples/` today; hosted demo, GIF and video pending | Everything |
