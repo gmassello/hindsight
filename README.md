@@ -11,6 +11,8 @@ The on-call agent for your data platform. When something breaks, Hindsight walks
 
 Built for the [Build with DataHub: The Agent Hackathon](https://datahub.devpost.com/) — track _Agents That Do Real Work_: agents that **read** DataHub to understand what is connected to what, **take action**, and **write the results back**.
 
+![A recorded investigation replayed: evidence timeline, ranked blast radius, the approval gate, and the mutations landing in DataHub](docs/media/replay.gif)
+
 ## Every claim, and where to check it
 
 Every number in this README comes from a file in this repository.
@@ -46,6 +48,14 @@ A later run even benefits from the write-back directly: an ancestor already tagg
 | `set_domains` | Domain assignment | Same — implemented, but never triggered in the captured runs (see [Honest limits](#honest-limits)) |
 | `save_document` | A postmortem document in the catalog | The **next** investigation's `recall` phase |
 
+Not a mock-up — this is DataHub's own UI rendering what the agent wrote:
+
+| The tag and the incident banner | The postmortem in the catalog |
+| --- | --- |
+| [![hindsight-degraded on the broken asset](docs/media/datahub-tag.png)](docs/media/datahub-tag.png) | [![The postmortem document](docs/media/datahub-postmortem.png)](docs/media/datahub-postmortem.png) |
+
+![The incident banner inside the asset description](docs/media/datahub-banner.png)
+
 ### vs. what DataHub already does
 
 | DataHub gives you | Hindsight adds |
@@ -53,6 +63,8 @@ A later run even benefits from the write-back directly: an ancestor already tagg
 | Impact Analysis lists downstream entities | A ranking over them by a deterministic impact score, and the deduplicated owner list you actually have to page |
 | A lineage graph you can walk by hand | An agent that walks it in both directions from a free-text alert and cites the URNs behind each hypothesis |
 | Documents you can write | A postmortem the next investigation *retrieves and acts on* — memory, not documentation |
+
+![The blast radius, ranked by impact score, with the deduplicated owner list](docs/media/ui-investigation.png)
 
 ## Architecture
 
@@ -75,6 +87,10 @@ A later run even benefits from the write-back directly: an ancestor already tagg
 - **Human gate by default.** The agent can run autonomously (`--auto-approve`), but the default is a dry-run plan awaiting explicit approval. Every applied mutation is recorded in a JSONL audit log with timestamp, tool, URN, args and rationale.
 - **Grounded mutations only.** `propose` sees the live mutation schemas and a whitelist of the URNs the investigation actually saw. A mutation it cannot ground in a real URN is dropped, not guessed.
 - **MCP first, GraphQL fallback.** DataHub access goes through the official [`mcp-server-datahub`](https://github.com/acryldata/mcp-server-datahub) (stdio, mutations enabled). If a mutation tool is missing or fails, the same mutation is applied through the GMS GraphQL API.
+
+Every mutation, with the URN and the rationale, waiting for a human — nothing has been written yet:
+
+![The dry-run plan at the approval gate](docs/media/ui-action-plan.png)
 
 ## Quickstart
 

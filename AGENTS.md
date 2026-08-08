@@ -17,6 +17,7 @@ uv sync                                  # create .venv and install deps
 .venv/bin/pytest tests/test_lineage.py -k test_impact_score_formula   # single test
 .venv/bin/hindsight investigate "<incident text>" [--auto-approve]    # full agent run (CLI)
 .venv/bin/hindsight replay ../examples/02-cold-vs-warm/cold           # reprint a captured run offline
+.venv/bin/python ../scenarios/build_recordings.py                     # re-sync frontend/public/recordings.json from examples/
 .venv/bin/hindsight serve                # FastAPI on :8000
 ```
 
@@ -35,6 +36,7 @@ Frontend (from `frontend/`, React + Vite + TS):
 ```bash
 npm install
 npm run dev                              # Vite dev server on :5173 (CORS default already allows it)
+VITE_DEMO_MODE=1 npm run dev             # replay mode: plays back examples/, no backend needed
 npm run build                            # tsc + vite build — the frontend gate before finishing any task
 npm run lint                             # oxlint
 ```

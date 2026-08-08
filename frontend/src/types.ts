@@ -132,3 +132,12 @@ export interface CommitResponse {
   state: InvestigationState
   events: TimelineEvent[]
 }
+
+export interface Recording {
+  id: string
+  title: string
+  blurb: string
+  source: string
+  events: TimelineEvent[]
+  state: InvestigationState
+}

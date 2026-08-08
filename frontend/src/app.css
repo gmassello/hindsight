@@ -106,6 +106,71 @@ body {
   margin-bottom: 32px;
 }
 
+.header-right {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+}
+
+.demo-note {
+  border-left: 3px solid var(--purple);
+  color: var(--text-muted);
+  font-size: 13px;
+  margin-bottom: 20px;
+  padding: 12px 14px;
+  text-align: left;
+}
+
+.demo-note strong {
+  color: var(--text);
+}
+
+.scenario-list {
+  display: grid;
+  gap: 10px;
+}
+
+.scenario-card {
+  text-align: left;
+}
+
+.scenario-card:hover {
+  border-color: var(--blue);
+}
+
+.scenario-pick {
+  background: none;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  display: grid;
+  font-family: inherit;
+  font-size: 14px;
+  gap: 4px;
+  padding: 0;
+  text-align: left;
+  width: 100%;
+}
+
+.scenario-title {
+  font-weight: 600;
+}
+
+.scenario-blurb {
+  font-size: 13px;
+}
+
+.scenario-meta {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+.scenario-meta a {
+  color: var(--blue);
+}
+
 .incident-input textarea {
   width: 100%;
   background: var(--bg-panel);
