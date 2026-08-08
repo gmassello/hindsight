@@ -125,6 +125,14 @@ body {
   color: var(--text);
 }
 
+.demo-ribbon {
+  border-left: 3px solid var(--purple);
+  color: var(--text-muted);
+  font-size: 12px;
+  margin: 0 24px 12px;
+  padding: 8px 12px;
+}
+
 .scenario-list {
   display: grid;
   gap: 10px;
@@ -165,10 +173,6 @@ body {
   font-family: var(--font-mono);
   font-size: 12px;
   margin-top: 6px;
-}
-
-.scenario-meta a {
-  color: var(--blue);
 }
 
 .incident-input textarea {
