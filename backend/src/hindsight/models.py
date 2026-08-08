@@ -13,6 +13,7 @@ CauseType = Literal[
     "historical_precedent",
     "unknown",
 ]
+Verdict = Literal["probable_cause", "insufficient_evidence", "exonerated"]
 
 
 class TimelineEvent(BaseModel):
@@ -122,6 +123,7 @@ class Mutation(BaseModel):
 class ActionPlan(BaseModel):
     mutations: list[Mutation] = Field(default_factory=list)
     postmortem_title: str = ""
+    rationale: str = ""
 
 
 class CommitRecord(BaseModel):
@@ -143,6 +145,7 @@ class InvestigationState(BaseModel):
     recall: RecallResult | None = None
     blast_radius: BlastRadius | None = None
     hypotheses: list[Hypothesis] = Field(default_factory=list)
+    verdict: Verdict = "insufficient_evidence"
     plan: ActionPlan | None = None
     committed: list[CommitRecord] = Field(default_factory=list)
     postmortem_ref: str | None = None

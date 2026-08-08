@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 
 from hindsight.agent.context import Ctx
 from hindsight.agent.phase_agent import run_phase_agent
-from hindsight.models import Hypothesis, TimelineEvent
+from hindsight.models import Hypothesis, TimelineEvent, Verdict
 
 SYSTEM = """You are Hindsight, the on-call agent for a data platform. Find the most likely root
 cause of this incident by investigating the upstream lineage in DataHub.
@@ -20,10 +20,23 @@ Procedure:
    - upstream_incident: an ancestor already tagged hindsight-degraded (written by a previous
      Hindsight run — the system reads its own past actions).
    - propagation path: get_lineage_paths_between the broken asset and a suspect ancestor.
-4. Call submit_hypotheses with hypotheses ranked by confidence (highest first). Each one must
-   cite concrete evidence and the URNs it is based on. Never give a single answer with false
-   certainty: an honest on-call gives ranked hypotheses. If you found nothing conclusive,
-   say so with low confidence."""
+4. Call submit_hypotheses with a verdict and hypotheses ranked by confidence (highest first).
+
+Grounded hypotheses only. Every hypothesis must put in evidence_urns at least one URN a tool
+actually returned, and its evidence must be something you read in the catalog. A cause you cannot
+point at in DataHub is a guess, not a hypothesis: never name an external system, vendor, team or
+upstream process that the catalog does not contain. Confidence describes what you observed, not
+how well a story would explain the symptom — 90% means the catalog shows it.
+
+The verdict is a judgement about the incident itself, and not every alert is one:
+- probable_cause: a specific failure is visible in the catalog. Rank the hypotheses.
+- insufficient_evidence: something may be wrong but the catalog does not show what. Say so
+  plainly instead of inventing a culprit — this is the honest answer when the checks below come
+  back clean but you cannot see the data the alert is about.
+- exonerated: you ran the checks in step 3 and they came back healthy — schema intact on the asset
+  and its ancestors, no ancestor tagged hindsight-degraded, no suspicious recent query. Reporting
+  this is a real answer, not a failure to find one. List the causes you ruled out as hypotheses
+  with near-zero confidence, each citing the URN that rules it out."""
 
 TOOLS = [
     "get_lineage",
@@ -35,6 +48,7 @@ TOOLS = [
 
 
 class HypothesesReport(BaseModel):
+    verdict: Verdict = "insufficient_evidence"
     hypotheses: list[Hypothesis] = Field(default_factory=list)
 
 
@@ -67,18 +81,25 @@ async def run(ctx: Ctx) -> AsyncIterator[TimelineEvent]:
             continue
         hypotheses = sorted(item.hypotheses, key=lambda h: h.confidence, reverse=True)
         state.hypotheses = hypotheses
-        if not hypotheses:
-            yield TimelineEvent(
-                phase="root_cause", kind="warning", message="No hypotheses produced"
+        state.verdict = item.verdict
+
+        if item.verdict == "exonerated":
+            message = f"Exonerated: no incident found. {len(hypotheses)} cause(s) ruled out."
+        elif hypotheses:
+            top = hypotheses[0]
+            message = (
+                f"{len(hypotheses)} hypothesis(es). Top: {top.statement} "
+                f"(confidence {round(top.confidence * 100)}%)"
             )
-            return
-        top = hypotheses[0]
+        else:
+            message = "Insufficient evidence: no hypothesis could be grounded in the catalog."
+
         yield TimelineEvent(
             phase="root_cause",
             kind="result",
-            message=(
-                f"{len(hypotheses)} hypothesis(es). Top: {top.statement} "
-                f"(confidence {round(top.confidence * 100)}%)"
-            ),
-            data={"hypotheses": [h.model_dump() for h in hypotheses]},
+            message=message,
+            data={
+                "verdict": item.verdict,
+                "hypotheses": [h.model_dump() for h in hypotheses],
+            },
         )

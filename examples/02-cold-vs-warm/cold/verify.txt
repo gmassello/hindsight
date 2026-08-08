@@ -1,0 +1,10 @@
+# Verification of cold
+
+- [x] tag urn:li:tag:hindsight-degraded on urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)
+- [ ] incident banner on urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)
+- [x] tag urn:li:tag:hindsight-impacted on urn:li:dashboard:(powerbi,b2fd91.reports.66666666-7777-8888-9999-000000000000)
+- [x] tag urn:li:tag:hindsight-impacted on urn:li:dashboard:(looker,b2fd91.dashboards.53)
+- [x] tag urn:li:tag:hindsight-impacted on urn:li:dataset:(urn:li:dataPlatform:dbt,b2fd91.ORDER_ENTRY_DB.analytics.order_details,PROD)
+- [x] postmortem urn:li:document:shared-bb0cf27d-a698-4a1a-820e-831e6f8632d0 still cites urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)
+
+verified 5/6

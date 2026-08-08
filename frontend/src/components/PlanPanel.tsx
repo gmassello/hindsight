@@ -13,7 +13,8 @@ interface Props {
 export default function PlanPanel({ plan, committed, postmortemRef, uiPhase, onApprove, onReject }: Props) {
   return (
     <div className={`panel plan ${uiPhase === 'rejected' ? 'plan-rejected' : ''}`}>
-      <h2>Proposed action plan</h2>
+      <h2>{plan.mutations.length === 0 ? 'No action proposed' : 'Proposed action plan'}</h2>
+      {plan.rationale && <p className="plan-rationale">{plan.rationale}</p>}
       {plan.postmortem_title && (
         <p className="plan-postmortem-title">
           Postmortem: <strong>{plan.postmortem_title}</strong>
@@ -45,7 +46,11 @@ export default function PlanPanel({ plan, committed, postmortemRef, uiPhase, onA
 
       {uiPhase === 'awaiting_approval' && (
         <div className="gate">
-          <span className="gate-label">Human approval required — nothing has been written yet.</span>
+          <span className="gate-label">
+            {plan.mutations.length === 0
+              ? 'Nothing to apply — approve to file the finding, reject to drop it.'
+              : 'Human approval required — nothing has been written yet.'}
+          </span>
           <div className="gate-actions">
             <button className="reject-btn" onClick={onReject}>
               Reject

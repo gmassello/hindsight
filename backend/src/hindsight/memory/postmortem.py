@@ -4,6 +4,8 @@ from hindsight.models import BlastRadius, InvestigationState
 def default_title(state: InvestigationState) -> str:
     asset = state.resolution.resolved_asset.name if state.resolution else "unknown asset"
     symptom = state.incident.symptom_type if state.incident else "incident"
+    if state.verdict == "exonerated":
+        return f"Not an incident {state.started_at}: {symptom} in {asset}"
     return f"Incident {state.started_at}: {symptom} in {asset}"
 
 
@@ -44,6 +46,7 @@ def render_markdown(state: InvestigationState, title: str) -> str:
     incident = state.incident
     resolution = state.resolution
     blast = state.blast_radius
+    exonerated = state.verdict == "exonerated"
     lines = [f"# {title}", ""]
     if resolution:
         lines.append(f"**Asset**: {resolution.resolved_asset.urn}")
@@ -52,7 +55,8 @@ def render_markdown(state: InvestigationState, title: str) -> str:
         lines.append(
             f"**Symptom**: {incident.symptom_type} — {incident.symptom_description}"
         )
-    lines.append("**Status**: active")
+    lines.append(f"**Status**: {'no action required' if exonerated else 'active'}")
+    lines.append(f"**Verdict**: {state.verdict}")
     lines.append("")
 
     if blast:
@@ -68,7 +72,7 @@ def render_markdown(state: InvestigationState, title: str) -> str:
         lines.append("")
 
     if state.hypotheses:
-        lines.append("## Root cause hypotheses")
+        lines.append("## Causes ruled out" if exonerated else "## Root cause hypotheses")
         for i, h in enumerate(state.hypotheses, 1):
             lines.append(f"{i}. {h.statement} — confidence {round(h.confidence * 100)}%")
             for e in h.evidence:
@@ -78,7 +82,13 @@ def render_markdown(state: InvestigationState, title: str) -> str:
         lines.append("")
 
     lines.append("## Resolution")
-    lines.append("Pending human confirmation.")
+    if exonerated:
+        rationale = (state.plan.rationale if state.plan else "") or (
+            "The pipeline was healthy. Nothing was written to the catalog and nobody was paged."
+        )
+        lines.append(rationale)
+    else:
+        lines.append("Pending human confirmation.")
     lines.append("")
     lines.append("## Detection signals")
     if state.hypotheses:
@@ -90,10 +100,10 @@ def render_markdown(state: InvestigationState, title: str) -> str:
         lines.append("No signals identified.")
     lines.append("")
     lines.append("## Tags")
-    tags = ["hindsight"]
+    tags = ["hindsight", state.verdict]
     if incident:
         tags.append(incident.symptom_type)
-    if state.hypotheses:
+    if state.hypotheses and not exonerated:
         tags.append(state.hypotheses[0].cause_type)
     lines.append(", ".join(tags))
     return "\n".join(lines)

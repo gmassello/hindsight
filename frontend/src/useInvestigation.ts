@@ -14,6 +14,7 @@ import type {
   Status,
   TimelineEvent,
   UiEvent,
+  Verdict,
 } from './types'
 
 export type UiPhase = 'idle' | Status
@@ -60,8 +61,10 @@ export function useInvestigation() {
           return { ...prev, recall: data as RecallResult }
         case 'impact':
           return { ...prev, blast_radius: data as BlastRadius }
-        case 'root_cause':
-          return { ...prev, hypotheses: (data as { hypotheses: Hypothesis[] }).hypotheses }
+        case 'root_cause': {
+          const result = data as { hypotheses: Hypothesis[]; verdict?: Verdict }
+          return { ...prev, hypotheses: result.hypotheses, verdict: result.verdict ?? prev.verdict }
+        }
         case 'propose':
           return { ...prev, plan: data as ActionPlan }
         default:
@@ -116,6 +119,7 @@ export function useInvestigation() {
         recall: null,
         blast_radius: null,
         hypotheses: [],
+        verdict: null,
         plan: null,
         committed: [],
         postmortem_ref: null,

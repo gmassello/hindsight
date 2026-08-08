@@ -65,7 +65,9 @@ export default function App() {
             {state?.resolution && <ResolvedAsset resolution={state.resolution} incident={state.incident} />}
             {state?.recall && <RecallPanel recall={state.recall} />}
             {state?.blast_radius && <BlastRadiusPanel blastRadius={state.blast_radius} />}
-            {state && state.hypotheses.length > 0 && <HypothesesPanel hypotheses={state.hypotheses} />}
+            {state && (state.hypotheses.length > 0 || state.verdict === 'exonerated') && (
+              <HypothesesPanel hypotheses={state.hypotheses} verdict={state.verdict} />
+            )}
             {state?.plan && (
               <PlanPanel
                 plan={state.plan}

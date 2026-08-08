@@ -1,0 +1,8 @@
+# Verification of 03-orphaned-asset
+
+- [x] tag urn:li:tag:hindsight-degraded on urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)
+- [x] incident banner on urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)
+- [x] owner urn:li:corpGroup:b2fd91.ORG_DATA_PLATFORM on urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)
+- [x] postmortem urn:li:document:shared-52dd787a-5fe5-49ec-b32d-99391ef9176f still cites urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_history,PROD)
+
+verified 4/4

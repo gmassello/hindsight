@@ -465,9 +465,14 @@ body {
   border-radius: 999px;
 }
 
-.badge-high { background: rgba(63, 185, 80, 0.15); color: var(--green); }
-.badge-medium { background: rgba(210, 153, 34, 0.15); color: var(--yellow); }
+.badge-high, .verdict-exonerated { background: rgba(63, 185, 80, 0.15); color: var(--green); }
+.badge-medium, .verdict-insufficient_evidence { background: rgba(210, 153, 34, 0.15); color: var(--yellow); }
 .badge-low { background: rgba(139, 148, 158, 0.15); color: var(--text-muted); }
+.verdict-probable_cause { background: rgba(88, 166, 255, 0.15); color: var(--blue); }
+
+.verdict {
+  margin-left: 10px;
+}
 
 .prior-summary, .prior-resolution {
   font-size: 12px;
@@ -609,7 +614,7 @@ body {
   margin-bottom: 3px;
 }
 
-.plan-postmortem-title {
+.plan-postmortem-title, .plan-rationale {
   font-size: 13px;
   color: var(--text-muted);
   margin-bottom: 10px;

@@ -1,7 +1,14 @@
-import type { Hypothesis } from '../types'
+import type { Hypothesis, Verdict } from '../types'
 
 interface Props {
   hypotheses: Hypothesis[]
+  verdict: Verdict | null
+}
+
+const VERDICT_LABEL: Record<Verdict, string> = {
+  probable_cause: 'probable cause',
+  insufficient_evidence: 'insufficient evidence',
+  exonerated: 'not an incident',
 }
 
 function confidenceClass(confidence: number): string {
@@ -10,11 +17,23 @@ function confidenceClass(confidence: number): string {
   return 'low'
 }
 
-export default function HypothesesPanel({ hypotheses }: Props) {
+export default function HypothesesPanel({ hypotheses, verdict }: Props) {
   const sorted = [...hypotheses].sort((a, b) => b.confidence - a.confidence)
+  const exonerated = verdict === 'exonerated'
   return (
     <div className="panel">
-      <h2>Root cause hypotheses</h2>
+      <h2>
+        {exonerated ? 'Causes ruled out' : 'Root cause hypotheses'}
+        {verdict && (
+          <span className={`badge verdict verdict-${verdict}`}>{VERDICT_LABEL[verdict]}</span>
+        )}
+      </h2>
+      {exonerated && (
+        <p className="muted">
+          The agent checked the pipeline and found it healthy. Nothing is being written to the
+          catalog, and nobody is being paged.
+        </p>
+      )}
       <ol className="hypothesis-list">
         {sorted.map((hypothesis, i) => (
           <li key={i} className="hypothesis">

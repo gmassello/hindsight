@@ -1,4 +1,5 @@
 from hindsight.memory.postmortem import default_title, render_markdown
+from hindsight.models import ActionPlan
 from tests.conftest import make_state
 
 
@@ -23,3 +24,23 @@ def test_default_title_uses_asset_and_symptom():
     assert "fct_orders" in title
     assert "nulls" in title
     assert "2026-08-08" in title
+
+
+def test_exonerated_run_is_not_documented_as_an_incident():
+    state = make_state(
+        verdict="exonerated",
+        plan=ActionPlan(rationale="Upstream fresh, schema intact, no failed jobs."),
+    )
+
+    md = render_markdown(state, "Not an incident")
+
+    assert "**Status**: no action required" in md
+    assert "**Verdict**: exonerated" in md
+    assert "## Causes ruled out" in md
+    assert "Upstream fresh, schema intact, no failed jobs." in md
+    assert "schema_drift_upstream" not in md.split("## Tags")[1]
+    assert "Pending human confirmation." not in md
+
+
+def test_exonerated_default_title_does_not_say_incident():
+    assert default_title(make_state(verdict="exonerated")).startswith("Not an incident")

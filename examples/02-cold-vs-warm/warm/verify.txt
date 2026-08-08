@@ -1,0 +1,13 @@
+# Verification of warm
+
+- [x] tag urn:li:tag:hindsight-degraded on urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)
+- [ ] incident banner on urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)
+- [x] tag urn:li:tag:hindsight-impacted on urn:li:dashboard:(looker,b2fd91.dashboards.53)
+- [x] tag urn:li:tag:hindsight-impacted on urn:li:dashboard:(tableau,b2fd91.843bf583-900b-f1ba-0532-b5e67a0373dc)
+- [x] tag urn:li:tag:hindsight-impacted on urn:li:dashboard:(powerbi,b2fd91.reports.66666666-7777-8888-9999-000000000000)
+- [x] tag urn:li:tag:hindsight-impacted on urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.analytics.order_details,PROD)
+- [x] tag urn:li:tag:hindsight-impacted on urn:li:dataset:(urn:li:dataPlatform:dbt,b2fd91.ORDER_ENTRY_DB.analytics.order_history,PROD)
+- [x] tag urn:li:tag:hindsight-impacted on urn:li:dataset:(urn:li:dataPlatform:dbt,b2fd91.ORDER_ENTRY_DB.analytics.order_details,PROD)
+- [x] postmortem urn:li:document:shared-a9ca759c-29c8-401d-a779-9d16f9d2bbb7 still cites urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)
+
+verified 8/9

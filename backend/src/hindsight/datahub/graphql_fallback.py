@@ -29,24 +29,50 @@ def _execute(query: str, variables: dict[str, Any]) -> Any:
     return body.get("data")
 
 
+_FACETS = (
+    "editableProperties { description } properties { description }"
+    " tags { tags { tag { urn } } }"
+    " ownership { owners { owner { ... on CorpUser { urn } ... on CorpGroup { urn } } } }"
+    " domain { domain { urn } }"
+)
+FACET_TYPES = ("Dataset", "Dashboard", "Chart", "DataJob")
+
+_FRAGMENTS = " ".join(f"... on {t} {{ {_FACETS} }}" for t in FACET_TYPES)
+FACETS_QUERY = f"query($urn: String!) {{ entity(urn: $urn) {{ {_FRAGMENTS} }} }}"
+
+
+def entity_facets(urn: str) -> dict[str, Any]:
+    data = _execute(FACETS_QUERY, {"urn": urn}) or {}
+    entity = data.get("entity") or {}
+    editable = (entity.get("editableProperties") or {}).get("description")
+    original = (entity.get("properties") or {}).get("description")
+    return {
+        "description": editable or original or "",
+        "tags": [t["tag"]["urn"] for t in (entity.get("tags") or {}).get("tags") or []],
+        "owners": [o["owner"]["urn"] for o in (entity.get("ownership") or {}).get("owners") or []],
+        "domain": ((entity.get("domain") or {}).get("domain") or {}).get("urn", ""),
+    }
+
+
 def dataset_description(urn: str) -> str:
+    return entity_facets(urn)["description"]
+
+
+def document_text(urn: str) -> str:
     data = _execute(
-        "query($urn: String!) { dataset(urn: $urn) {"
-        " editableProperties { description } properties { description } } }",
+        "query($urn: String!) { document(urn: $urn) { info { contents { text } } } }",
         {"urn": urn},
     )
-    dataset = data.get("dataset") or {}
-    editable = (dataset.get("editableProperties") or {}).get("description")
-    original = (dataset.get("properties") or {}).get("description")
-    return editable or original or ""
+    info = ((data or {}).get("document") or {}).get("info") or {}
+    return (info.get("contents") or {}).get("text") or ""
 
 
-def _tag_urn(tag: str) -> str:
+def tag_urn(tag: str) -> str:
     return tag if tag.startswith("urn:li:tag:") else f"urn:li:tag:{tag}"
 
 
 def ensure_tag(tag: str) -> None:
-    name = _tag_urn(tag).removeprefix("urn:li:tag:")
+    name = tag_urn(tag).removeprefix("urn:li:tag:")
     try:
         _execute(
             "mutation($input: CreateTagInput!) { createTag(input: $input) }",
@@ -60,7 +86,7 @@ def ensure_tag(tag: str) -> None:
 def add_tags(urn: str, tags: list[str]) -> None:
     _execute(
         "mutation($input: AddTagsInput!) { addTags(input: $input) }",
-        {"input": {"tagUrns": [_tag_urn(t) for t in tags], "resourceUrn": urn}},
+        {"input": {"tagUrns": [tag_urn(t) for t in tags], "resourceUrn": urn}},
     )
 
 

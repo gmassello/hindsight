@@ -11,6 +11,8 @@ export type CauseType =
   | 'historical_precedent'
   | 'unknown'
 
+export type Verdict = 'probable_cause' | 'insufficient_evidence' | 'exonerated'
+
 export type Status =
   | 'investigating'
   | 'awaiting_approval'
@@ -101,6 +103,7 @@ export interface Mutation {
 export interface ActionPlan {
   mutations: Mutation[]
   postmortem_title: string
+  rationale: string
 }
 
 export interface CommitRecord {
@@ -121,6 +124,7 @@ export interface InvestigationState {
   recall: RecallResult | null
   blast_radius: BlastRadius | null
   hypotheses: Hypothesis[]
+  verdict: Verdict | null
   plan: ActionPlan | null
   committed: CommitRecord[]
   postmortem_ref: string | null

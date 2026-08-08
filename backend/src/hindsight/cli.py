@@ -17,6 +17,7 @@ from hindsight.memory.postmortem import blast_table, postmortem_title, render_ma
 from hindsight.models import ActionPlan, InvestigationState, TimelineEvent
 from hindsight.safety.audit_log import records_for
 from hindsight.safety.dry_run import render_plan
+from hindsight.safety.verify import Check, check_postmortem, check_record, render_checks
 
 app = typer.Typer(add_completion=False)
 console = Console()
@@ -26,6 +27,8 @@ REPORT_OPTION = typer.Option(
 )
 
 REPLAY_ARGUMENT = typer.Argument(..., help="Report directory written by --report")
+
+VERIFY_ARGUMENT = typer.Argument(..., help="Report directory to re-check against DataHub")
 
 STYLES = {
     "start": ("bold cyan", "▶"),
@@ -153,6 +156,34 @@ def replay(
     console.print(
         f"Status: {state.status}. DataHub tool calls used: {state.tool_calls}.", style="bold"
     )
+
+
+@app.command()
+def verify(
+    directory: Path = VERIFY_ARGUMENT,
+) -> None:
+    audit_file = directory / "audit-log.json"
+    if not audit_file.exists():
+        console.print(f"No audit-log.json in {directory}", style="red")
+        raise typer.Exit(1)
+
+    state = InvestigationState.model_validate_json((directory / "state.json").read_text())
+    checks: list[Check] = []
+    for record in json.loads(audit_file.read_text()):
+        checks.extend(check_record(record))
+
+    if state.postmortem_ref and state.resolution:
+        checks.append(check_postmortem(state.postmortem_ref, state.resolution.resolved_asset.urn))
+
+    for ok, label in checks:
+        console.print(f"  {'✔' if ok else '✖'} {label}", style="green" if ok else "red")
+    (directory / "verify.txt").write_text(render_checks(directory.name, checks))
+
+    passed = sum(1 for ok, _ in checks if ok)
+    all_ok = bool(checks) and passed == len(checks)
+    console.print()
+    console.print(f"verified {passed}/{len(checks)}", style="bold green" if all_ok else "bold red")
+    raise typer.Exit(0 if all_ok else 1)
 
 
 @app.command()

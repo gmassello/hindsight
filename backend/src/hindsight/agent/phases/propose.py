@@ -13,7 +13,15 @@ Nothing you propose is executed yet; a human reviews the plan first.
 Available mutation tools and their exact argument schemas:
 {schemas}
 
-Conventions:
+The investigation reached this verdict: {verdict}
+
+If the verdict is exonerated, there is no incident and the catalog must not be marked as if there
+were one. Return zero mutations: no tags, no banner, no owners, no domain. Put in rationale one or
+two sentences on what was checked and why nothing is being written, and still give
+postmortem_title: the finding that this alert was not an incident is worth remembering. Proposing
+nothing is the correct answer here, not a failure.
+
+Otherwise, apply these conventions:
 - Tag the broken asset with urn:li:tag:hindsight-degraded.
 - Tag affected downstream consumers (the highest-impact ones) with urn:li:tag:hindsight-impacted.
 - update_description on the broken asset: prepend a short warning dated with detected_at
@@ -28,7 +36,7 @@ Conventions:
 {urns}
 
 Each mutation needs a one-line rationale. Also give postmortem_title: a short, specific title
-for the incident postmortem document."""
+for the postmortem document."""
 
 MAX_REPORT_CHARS = 4000
 
@@ -55,6 +63,7 @@ def _summary(ctx: Ctx) -> str:
             "incident": state.incident.model_dump() if state.incident else None,
             "resolved_asset": state.resolution.model_dump() if state.resolution else None,
             "blast_radius": state.blast_radius.model_dump() if state.blast_radius else None,
+            "verdict": state.verdict,
             "hypotheses": [h.model_dump() for h in state.hypotheses],
         },
         ensure_ascii=False,
@@ -70,29 +79,35 @@ async def run(ctx: Ctx) -> AsyncIterator[TimelineEvent]:
     system = SYSTEM.format(
         schemas=json.dumps(schemas, ensure_ascii=False),
         urns="\n".join(f"- {u}" for u in sorted(urns)),
+        verdict=ctx.state.verdict,
     )
     plan = await asyncio.to_thread(complete_structured, system, _summary(ctx), ActionPlan)
 
-    kept, dropped = [], []
-    for m in plan.mutations:
-        targets = m.targets()
-        if targets and all(t in urns for t in targets):
-            kept.append(m)
-        else:
-            dropped.append(m)
-    if dropped:
+    exonerated = ctx.state.verdict == "exonerated"
+    allowed: set[str] = set() if exonerated else urns
+    kept = [m for m in plan.mutations if m.targets() and all(t in allowed for t in m.targets())]
+    if len(kept) < len(plan.mutations):
+        reason = (
+            "the verdict is exonerated, so the catalog is not marked"
+            if exonerated
+            else "they reference URNs never seen during the investigation"
+        )
         yield TimelineEvent(
             phase="propose",
             kind="warning",
-            message=f"Dropped {len(dropped)} mutation(s) referencing URNs never seen "
-            "during the investigation",
+            message=f"Dropped {len(plan.mutations) - len(kept)} mutation(s): {reason}",
         )
     plan.mutations = kept
     ctx.state.plan = plan
+
+    detail = (
+        "No action proposed: this alert is not an incident. Only the finding is saved."
+        if exonerated
+        else f"Action plan ready: {len(kept)} mutation(s) + 1 postmortem document."
+    )
     yield TimelineEvent(
         phase="propose",
         kind="result",
-        message=f"Action plan ready: {len(plan.mutations)} mutation(s) + 1 postmortem document. "
-        "Awaiting human approval.",
+        message=f"{detail} Awaiting human approval.",
         data=plan.model_dump(),
     )
