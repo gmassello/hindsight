@@ -3,6 +3,7 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/gmassello/hindsight/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/gmassello/hindsight/ci.yml?branch=main&style=flat-square&label=CI" alt="CI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-3b82a0.svg?style=flat-square" alt="License"></a>
   <a href="backend/pyproject.toml"><img src="https://img.shields.io/badge/python-3.13-3b82a0.svg?style=flat-square" alt="Python 3.13"></a>
   <img src="https://img.shields.io/badge/DataHub-MCP%20%2B%20GraphQL-e39a3c?style=flat-square" alt="DataHub MCP + GraphQL">

@@ -36,13 +36,16 @@ The track rewards agents that **read** DataHub, **act**, and **write back**. All
 - [x] Clean-clone test: repo cloned from GitHub into a fresh directory works following only the README — `uv sync`, `ruff`, `pytest` (30 passed), `hindsight serve` answering on `:8000`, `npm ci` + `npm run build`. Ran without DataHub, so it covers install/lint/test/build, not an end-to-end investigation (`examples/` already carries that evidence). Surfaced three defects, all fixed: Node missing from the prerequisites, no Docker resource floor for the quickstart, and `Settings.env_file` resolving relative to the cwd — which meant the `scenarios/` scripts, invoked from the repo root, silently ignored `backend/.env`
 - [x] Open source Skill PR: [datahub-project/datahub-skills#110](https://github.com/datahub-project/datahub-skills/pull/110) — `feat: add datahub-incident-triage skill`. `Lint PR Title` green; the `Lint` workflow awaits first-time-contributor approval from a maintainer (pre-commit passes locally on the exact tree pushed). The PR link is enough, merge not required
 
+- [x] Hosted demo reachable by URL — **required by the rules**: https://gmassello.github.io/hindsight/ — static replay of the captured runs on GitHub Pages, published by `.github/workflows/pages.yml`. Overview page alongside it at `/landing/`
+- [x] CI on `main` and every PR: `.github/workflows/ci.yml` runs backend (`uv sync` + `ruff` + `pytest`) and frontend (`npm ci` + `npm run build` + `oxlint`) as parallel jobs
+
 ### Pending
 
-- [x] Hosted demo reachable by URL — **required by the rules**: https://gmassello.github.io/hindsight/ — static replay of the captured runs on GitHub Pages, published by `.github/workflows/pages.yml`. Overview page alongside it at `/landing/`
-- [ ] Video: 3 minutes, **public**, script written before recording with a timer per section
-  - [ ] Opens with the real on-call pain (first 20 seconds → applicability criterion)
-  - [ ] Shows scenario 2 (cold vs. warm) as the closing moment
-  - [ ] Ends on the DataHub UI showing what the agent wrote
+- [ ] Video: 3 minutes, **public** — shot list and narration written before recording, in [`video/`](video); the build pipeline reports the measured length per beat
+  - [x] Opens with the real on-call pain (first 20 seconds → applicability criterion)
+  - [x] Shows scenario 2 (cold vs. warm) right before the closing moment
+  - [x] Ends on the DataHub UI showing what the agent wrote — beat 6, after the warm run
+  - [ ] Recorded, assembled, uploaded as public
 - [ ] **Submission loaded on Devpost** — including the Skill PR link
 - [ ] Feedback survey (US$50)
 
@@ -56,7 +59,7 @@ All six criteria weigh equally; each needs an explicit answer.
 | Technical quality | Deterministic phase pipeline, per-phase toolset, dry-run, tests, GraphQL fallback | README "How it works" + `backend/tests/` |
 | Originality | The memory loop: the system improves with use and the knowledge lives in DataHub | Scenario 2 in the video |
 | Real-world applicability | Data on-call: concrete, expensive pain, backed by first-hand experience | First 20 seconds of the video |
-| Delivery quality | `docker compose up` + README + `examples/` + hosted demo today; video pending | Everything |
+| Delivery quality | `docker compose up` + README + `examples/` + hosted demo + CI on main and every PR; video pending | Everything |
 | **Open source bonus** | `datahub-incident-triage` Skill proposed upstream | [datahub-skills#110](https://github.com/datahub-project/datahub-skills/pull/110) |
 
 ## Demo scenarios
@@ -78,7 +81,7 @@ Scenarios 1–3 are defined in `scenarios/scenarios.yaml` and reproducible from 
 
 - [x] README with architecture diagram and justified decisions
 - [x] Skill PR opened — [datahub-project/datahub-skills#110](https://github.com/datahub-project/datahub-skills/pull/110)
-- [ ] Hosted demo live and reachable
+- [x] Hosted demo live and reachable — https://gmassello.github.io/hindsight/
 - [ ] Video recorded, edited, uploaded as **public**
 - [ ] Devpost submission loaded — not "almost ready"
 - [ ] Monday buffer: fresh-eyes review, finish before noon (deadline 18:00 ART)

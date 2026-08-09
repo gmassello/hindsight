@@ -1,0 +1,69 @@
+beat	gap	caption	speak
+# ---------------------------------------------------------------------------
+# The narration script, split into caption-sized lines. This file is the
+# source: docs/demo-script.md lists what is ON SCREEN per beat, the words live
+# only here, and out/timing.txt reports the measured length of each beat.
+#
+# One line here = one caption on screen = one TTS clip. Because each line is
+# rendered as its own audio file, the subtitle timings are exact by
+# construction: no forced alignment, no guessing.
+#
+# Columns (TAB separated):
+#   beat    - beat number, matching the shot list in video/demo-script.md
+#   gap     - seconds of SILENCE before this line. Use it to let a moment
+#             breathe. A line with an empty caption is a pure pause.
+#   caption - what the viewer READS. Max ~10 words. Numbers as digits.
+#   speak   - what the voice SAYS. Leave empty to speak the caption verbatim.
+#             Only fill it in when digits or identifiers would be mangled.
+#
+# Lines starting with # are ignored. Keep the header row as-is.
+# ---------------------------------------------------------------------------
+
+1	0.8	Hindsight — the on-call agent for your data platform	Hindsight. The on-call agent for your data platform.
+1	0.5	Built for the DataHub Agent Hackathon	Built for the DataHub Agent Hackathon.
+1	0.7	Your dashboard has been wrong since 03:00	Your dashboard has been wrong since three A M.
+1	0.4	A column upstream started returning nulls
+1	0.4	On-call opens the lineage graph and starts clicking
+1	1.0
+
+2	0.6	Hindsight does that walk, and writes the answer back
+2	0.7	Four investigations against a live DataHub
+2	0.4	Replayed here exactly as they were captured	Replayed here exactly as they were captured. Event stream and all.
+2	1.0
+
+3	0.8	Cold start: the memory is empty
+3	0.5	Three tables are called "orders"	Three tables are called orders.
+3	0.4	It says which one it picked, and why
+3	1.2	Then it walks downstream
+3	0.5	29 consumers, ranked by a deterministic formula	Twenty nine consumers, ranked by a deterministic formula.
+3	0.4	And the 14 owners to page	And the fourteen owners to page.
+3	1.2	Upstream: the S3 source and the Spark ingestion job	Upstream, it lands on the S three source and the Spark ingestion job.
+3	0.4	Ranked hypotheses, with the confidence next to each	Ranked hypotheses, with the confidence next to each one.
+3	1.0
+
+4	0.8	Nothing is written without a human
+4	0.5	3 mutations and a postmortem, as a dry run	Three mutations and a postmortem, as a dry run.
+4	0.4	Each one with the reason it exists
+4	1.0	Approve — and it goes into DataHub over MCP	Approve. And it goes into DataHub over M C P.
+4	1.0
+
+5	0.8	Same incident, one postmortem later
+5	0.5	recall finds it	Recall finds it.
+5	0.4	And points root cause straight at the ingestion job
+5	1.2	20 tool calls cold. 15 warm	Twenty tool calls cold. Fifteen warm.
+5	0.6	The memory lives inside DataHub
+5	0.4	The next on-call inherits it either way	So the next on-call inherits it, whether or not they ever run this agent.
+5	1.0
+
+6	0.8	And this is DataHub itself, after the run	And this is DataHub itself, after the run.
+6	0.6	The broken table, tagged degraded
+6	0.6	An incident banner on its description
+6	0.6	The postmortem, saved as a DataHub document
+6	0.8	Re-read afterwards through GraphQL	Every one of those re-read afterwards through GraphQL.
+6	0.4	A different channel from the one that wrote them
+6	1.0
+
+7	0.8	The same procedure ships as a DataHub Skill	The same procedure also ships as an open source DataHub Skill.
+7	0.4	Proposed upstream, no Hindsight code in the loop
+7	0.5	It reached the same 14 owners, set for set	And it reached the same fourteen owners, set for set.
+7	0.8	gmassello.github.io/hindsight	The demo is at G massello dot github dot I O, slash hindsight.
