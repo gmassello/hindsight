@@ -3,6 +3,21 @@
 </p>
 
 <p align="center">
+  <b>Your dashboard has been wrong since 03:00.</b><br>
+  Hindsight walks your DataHub lineage to find what broke it, ranks who it hits, and writes the answer back into the catalog —<br>
+  then re-reads every change through a different API to prove it landed. An agent that reports its own success proves nothing.
+</p>
+
+<p align="center">
+  <a href="https://gmassello.github.io/hindsight/"><b>Live demo</b></a> ·
+  <a href="https://youtu.be/y04gl1faens"><b>Video (2:33)</b></a> ·
+  <a href="https://github.com/datahub-project/datahub-skills/pull/110"><b>Skill PR</b></a> ·
+  <a href="examples/"><b>Captured runs</b></a> ·
+  <a href="SUBMISSION.md"><b>Submission</b></a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/track-Agents%20That%20Do%20Real%20Work-6f42c1?style=flat-square" alt="Track: Agents That Do Real Work">
   <a href="https://github.com/gmassello/hindsight/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/gmassello/hindsight/ci.yml?branch=main&style=flat-square&label=CI" alt="CI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-3b82a0.svg?style=flat-square" alt="License"></a>
   <a href="backend/pyproject.toml"><img src="https://img.shields.io/badge/python-3.13-3b82a0.svg?style=flat-square" alt="Python 3.13"></a>
@@ -12,11 +27,11 @@
 
 ---
 
-**Your dashboard has been wrong since 03:00.** Hindsight already knows what broke it, who it hits, and writes the answer back into the catalog — so the next incident starts where this one ended.
+**Data on-call, not ML drift.** The alert is free text, the root cause is ranked and grounded in incidents you already solved, and the postmortem is filed *inside DataHub* — where the next investigation finds it. Built for the [Build with DataHub: The Agent Hackathon](https://datahub.devpost.com/), track *Agents That Do Real Work*.
 
-It takes a free-text alert, walks the DataHub lineage graph to rank who is affected, proposes a root cause backed by incidents you already solved, and files the postmortem *inside DataHub*. Built for the [Build with DataHub: The Agent Hackathon](https://datahub.devpost.com/), track *Agents That Do Real Work*.
-
-**[▶ Watch it run in your browser](https://gmassello.github.io/hindsight/)** — a recorded investigation replaying in the real UI: evidence timeline, ranked blast radius, the approval gate. No install, no API key. Or watch the [2:33 demo video](https://youtu.be/y04gl1faens), which ends on the DataHub UI showing what the agent wrote.
+```bash
+cd backend && .venv/bin/hindsight replay ../examples/02-cold-vs-warm/warm    # ten seconds, no DataHub, no API key
+```
 
 <table>
 <tr>
@@ -26,9 +41,11 @@ It takes a free-text alert, walks the DataHub lineage graph to rank who is affec
 </tr>
 </table>
 
+And none of it depends on this codebase. The same procedure runs as a portable [Agent Skill](.agents/skills/datahub-incident-triage), no Python in the loop, and reaches **the same fourteen owners, set for set** — [the run](examples/04-skill-portability), [proposed upstream](https://github.com/datahub-project/datahub-skills/pull/110).
+
 ### An agent that reports its own success proves nothing
 
-So it doesn't. Two commands close that hole, and neither needs you to take the agent's word for it:
+So it doesn't take its own word for it:
 
 ```bash
 cd backend && .venv/bin/hindsight verify ../examples/01-schema-drift    # → verified 5/5
@@ -36,11 +53,7 @@ cd backend && .venv/bin/hindsight verify ../examples/01-schema-drift    # → ve
 
 `verify` re-reads every mutation in a run's audit log straight from DataHub **through the GMS GraphQL API — not the MCP tools that wrote it** — and exits non-zero if anything is missing. It has already caught a real defect: [`examples/02-cold-vs-warm/cold/verify.txt`](examples/02-cold-vs-warm/cold/verify.txt) reports `verified 5/6`, and the failure is a second run silently overwriting the first one's incident banner. Every run had reported success. The failing file ships as it came out.
 
-```bash
-cd backend && .venv/bin/hindsight replay ../examples/02-cold-vs-warm/warm    # no DataHub, no API key
-```
-
-`replay` reprints a captured run from its raw event stream — [`events.json`](examples/02-cold-vs-warm/warm/events.json). Clone the repo and watch a real investigation without installing anything.
+That is the rule the product is built on: nothing counts until a second channel confirms it. Its companion is `replay` — the command at the top of this page — which reprints a captured run from its raw event stream, [`events.json`](examples/02-cold-vs-warm/warm/events.json). Clone the repo and watch a real investigation without installing anything.
 
 <p align="center">
   <img src="docs/media/replay.gif" alt="hindsight replay reprinting a captured investigation in the terminal" width="100%">
@@ -50,9 +63,33 @@ cd backend && .venv/bin/hindsight replay ../examples/02-cold-vs-warm/warm    # n
 
 | | |
 | --- | --- |
-| **See the memory loop pay off** | [`examples/02-cold-vs-warm`](examples/02-cold-vs-warm) — the same incident, 20 tool calls cold vs. 15 warm |
+| **See the memory loop pay off** | [`examples/02-cold-vs-warm`](examples/02-cold-vs-warm) — the second run retrieves the first one's postmortem out of the catalog: 20 tool calls cold vs. 15 warm |
 | **See it do real work** | [`examples/01-schema-drift`](examples/01-schema-drift) — 14 tool calls, 16 consumers, 10 owners paged, postmortem filed, `verified 5/5` |
 | **See it work without our code** | [`examples/04-skill-portability`](examples/04-skill-portability) — the same procedure as a portable Agent Skill, [proposed upstream](https://github.com/datahub-project/datahub-skills/pull/110) |
+
+---
+
+## What it actually leaves behind
+
+Not a mock-up — DataHub's own UI after a run, and the app driving it.
+
+<table>
+<tr>
+<td width="50%"><img src="docs/media/datahub-tag.png" alt="hindsight-degraded tag on the broken asset in DataHub"><br><sub><b>The tag.</b> <code>hindsight-degraded</code> on the broken asset — and evidence for the next run's upstream-incident hypothesis.</sub></td>
+<td width="50%"><img src="docs/media/datahub-banner.png" alt="Incident banner at the top of the asset description in DataHub"><br><sub><b>The banner.</b> Every consumer who opens the asset sees the incident at the top of the description.</sub></td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/media/datahub-postmortem.png" alt="Postmortem document stored in the DataHub catalog"><br><sub><b>The postmortem.</b> A catalog document, not a side database — this is what <code>recall</code> retrieves next time.</sub></td>
+<td width="50%"><img src="docs/media/ui-action-plan.png" alt="Proposed action plan rendered as a diff with Approve and Reject"><br><sub><b>The human gate.</b> The plan as a dry-run diff, with a rationale per mutation.</sub></td>
+</tr>
+</table>
+
+<details>
+<summary>The live investigation view</summary>
+
+<img src="docs/media/ui-investigation.png" alt="Evidence timeline streaming over SSE while result panels fill in per phase" width="100%">
+
+</details>
 
 ---
 
@@ -103,30 +140,6 @@ Prerequisites: Python 3.13+, [uv](https://docs.astral.sh/uv/), Node 20.19+. On c
 
 ---
 
-## What it actually leaves behind
-
-Not a mock-up — DataHub's own UI after a run, and the app driving it.
-
-<table>
-<tr>
-<td width="50%"><img src="docs/media/datahub-tag.png" alt="hindsight-degraded tag on the broken asset in DataHub"><br><sub><b>The tag.</b> <code>hindsight-degraded</code> on the broken asset — and evidence for the next run's upstream-incident hypothesis.</sub></td>
-<td width="50%"><img src="docs/media/datahub-banner.png" alt="Incident banner at the top of the asset description in DataHub"><br><sub><b>The banner.</b> Every consumer who opens the asset sees the incident at the top of the description.</sub></td>
-</tr>
-<tr>
-<td width="50%"><img src="docs/media/datahub-postmortem.png" alt="Postmortem document stored in the DataHub catalog"><br><sub><b>The postmortem.</b> A catalog document, not a side database — this is what <code>recall</code> retrieves next time.</sub></td>
-<td width="50%"><img src="docs/media/ui-action-plan.png" alt="Proposed action plan rendered as a diff with Approve and Reject"><br><sub><b>The human gate.</b> The plan as a dry-run diff, with a rationale per mutation.</sub></td>
-</tr>
-</table>
-
-<details>
-<summary>The live investigation view</summary>
-
-<img src="docs/media/ui-investigation.png" alt="Evidence timeline streaming over SSE while result panels fill in per phase" width="100%">
-
-</details>
-
----
-
 ## How it works
 
 ![The phase pipeline: intake, resolve, recall, impact, root_cause, propose, human gate, commit, learn](docs/assets/pipeline.webp)
@@ -143,13 +156,15 @@ Plus a human gate by default (`--auto-approve` opts out), a deterministic state 
 
 ---
 
-## Why memory is the feature
+## The memory lives in the catalog, not in a side database
+
+The postmortem is a DataHub document. Not a SQLite file, not a vector store, not a table only this agent can read — a catalog entity that `search_documents` returns to whoever asks: the next run, a different agent, or the engineer who opens the UI at 03:00 next quarter. Nothing here is memory *about* DataHub; it is memory *inside* it.
+
+That is what makes the write-back compound. An ancestor already tagged `hindsight-degraded` is *evidence* for the next run's upstream-incident hypothesis — the system reads its own past actions through the same tools anyone else would use.
 
 ![Cold run: 20 DataHub tool calls, 29 consumers swept. Warm run: 15 calls, 6 consumers. 25% fewer calls.](docs/assets/memory.webp)
 
-A later run benefits from the write-back directly: an ancestor already tagged `hindsight-degraded` is *evidence* for the upstream-incident hypothesis. The system reads its own past actions.
-
-And it is not free. The warm run was cheaper **and narrower** — 6 consumers swept against the cold run's 29. Both converged on the same ancestor, but a warm run trusts memory instead of re-deriving the blast radius. That tradeoff is the honest version of this graph.
+It also buys speed, and that part is not free. The warm run was cheaper **and narrower** — 6 consumers swept against the cold run's 29. Both converged on the same ancestor, but a warm run trusts memory instead of re-deriving the blast radius. That tradeoff is the honest version of this graph.
 
 ### What gets written, and who inherits it
 
@@ -215,7 +230,7 @@ Every number above comes from a file in this repository.
 
 [`.agents/skills/datahub-incident-triage/`](.agents/skills/datahub-incident-triage) distills the agent into an [Agent Skills](https://skills.sh) package: the same seven-step procedure as plain instructions, no Python. Any Agent-Skills CLI with DataHub connected gets the behaviour without cloning this repo.
 
-It has been run end to end — [`examples/04-skill-portability`](examples/04-skill-portability) reaches **the same fourteen owners, set for set**, and names scenario 1's conclusion as its own second hypothesis. Caveats and the three defects verification surfaced are documented there.
+[`examples/04-skill-portability`](examples/04-skill-portability) is that run: it names scenario 1's conclusion as its own second hypothesis, and documents the caveats and the three defects verification surfaced in the skill.
 
 ---
 
