@@ -41,6 +41,7 @@ export function useInvestigation() {
   const [override, setOverride] = useState<UiPhase | null>(null)
   const [error, setError] = useState<string | null>(null)
   const replay = useRef<ReplayRun | null>(null)
+  const stream = useRef<EventSource | null>(null)
   const uiPhase: UiPhase = override ?? state?.status ?? 'idle'
 
   const pushEvent = useCallback((event: TimelineEvent) => {
@@ -95,6 +96,8 @@ export function useInvestigation() {
 
   const reset = useCallback(() => {
     replay.current = null
+    stream.current?.close()
+    stream.current = null
     setState(null)
     setEvents([])
     setOverride(null)
@@ -141,6 +144,7 @@ export function useInvestigation() {
         setState(created)
 
         const es = new EventSource(`${API_URL}/investigations/${created.id}/stream`)
+        stream.current = es
         for (const kind of KINDS) {
           es.addEventListener(kind, (e) => {
             handleEvent(JSON.parse((e as MessageEvent).data) as TimelineEvent)

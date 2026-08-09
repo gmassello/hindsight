@@ -24,7 +24,7 @@ async def run(ctx: Ctx) -> AsyncIterator[TimelineEvent]:
     ref = ""
     if isinstance(result, dict):
         ref = result.get("urn") or result.get("id") or ""
-    state.postmortem_ref = ref or title
+    state.postmortem_ref = ref or None
     yield TimelineEvent(
         phase="learn",
         kind="result",

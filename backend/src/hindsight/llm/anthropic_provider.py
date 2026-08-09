@@ -3,7 +3,7 @@ from typing import Any
 import anthropic
 
 from hindsight.config import settings
-from hindsight.llm.base import Message, ToolSpec, ToolUse, Turn, as_text
+from hindsight.llm.base import Message, ToolSpec, ToolUse, Turn, as_text, merge_user_turns
 
 
 def _to_anthropic_message(message: Message) -> dict[str, Any]:
@@ -38,7 +38,7 @@ class AnthropicProvider:
             model=self.model,
             max_tokens=settings.max_tokens,
             system=system,
-            messages=[_to_anthropic_message(m) for m in messages],
+            messages=[_to_anthropic_message(m) for m in merge_user_turns(messages)],
             tools=[
                 {
                     "name": tool.name,

@@ -4,7 +4,7 @@ from typing import Any
 import boto3
 
 from hindsight.config import settings
-from hindsight.llm.base import Message, ToolSpec, ToolUse, Turn
+from hindsight.llm.base import Message, ToolSpec, ToolUse, Turn, merge_user_turns
 
 BEARER_TOKEN_ENV = "AWS_BEARER_TOKEN_BEDROCK"
 
@@ -57,7 +57,7 @@ class BedrockClaudeProvider:
         response = self.client.converse(
             modelId=self.model_id,
             system=[{"text": system}],
-            messages=[_to_bedrock_message(m) for m in messages],
+            messages=[_to_bedrock_message(m) for m in merge_user_turns(messages)],
             inferenceConfig={"maxTokens": settings.max_tokens},
             toolConfig={
                 "tools": [

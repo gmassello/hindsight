@@ -31,3 +31,16 @@ def test_build_blast_radius_orders_and_dedupes_owners():
     assert blast.impacted[0].urn == "urn:li:dashboard:b"
     assert blast.owners_to_notify == ["u1", "u2"]
     assert blast.total_score == round(sum(a.score for a in blast.impacted), 2)
+
+
+def test_build_blast_radius_dedupes_consumers_by_urn():
+    dashboard = "urn:li:dashboard:b"
+    blast = build_blast_radius(
+        [
+            ConsumerReport(urn=dashboard, type="dashboard", hops=3),
+            ConsumerReport(urn=dashboard, type="dashboard", hops=2),
+        ]
+    )
+    assert len(blast.impacted) == 1
+    assert blast.impacted[0].hops == 2
+    assert blast.total_score == impact_score("dashboard", dashboard, 2, False, False, False)

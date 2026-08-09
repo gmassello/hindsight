@@ -5,6 +5,7 @@ from typer.testing import CliRunner
 
 from hindsight.cli import _write_report, app
 from hindsight.config import settings
+from hindsight.datahub.graphql_fallback import GraphQLError, run_fallback
 from hindsight.safety.verify import check_record
 from tests.conftest import make_state
 
@@ -102,3 +103,19 @@ def test_verify_without_audit_log_fails(tmp_path):
 
     assert result.exit_code == 1
     assert "No audit-log.json" in result.stdout
+
+
+def test_run_fallback_without_a_target_raises(monkeypatch):
+    written: list[tuple[str, list[str]]] = []
+    monkeypatch.setattr(
+        "hindsight.datahub.graphql_fallback.add_tags",
+        lambda urn, tags: written.append((urn, tags)),
+    )
+    args = {"tag_urns": ["hindsight-degraded"]}
+
+    with pytest.raises(GraphQLError):
+        run_fallback("add_tags", args)
+    assert written == []
+
+    run_fallback("add_tags", args, URN)
+    assert written == [(URN, ["hindsight-degraded"])]

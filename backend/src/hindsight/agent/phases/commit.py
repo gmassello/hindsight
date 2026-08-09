@@ -5,23 +5,23 @@ from collections.abc import AsyncIterator
 from hindsight.agent.context import Ctx
 from hindsight.config import settings
 from hindsight.datahub import graphql_fallback
-from hindsight.models import CommitRecord, TimelineEvent
+from hindsight.models import CommitRecord, Mutation, TimelineEvent
 from hindsight.safety import audit_log
 
 log = logging.getLogger(__name__)
 
 
-async def _execute(ctx: Ctx, tool: str, args: dict) -> str:
-    if ctx.datahub.has(tool):
+async def _execute(ctx: Ctx, m: Mutation) -> str:
+    via = "graphql"
+    if ctx.datahub.has(m.tool):
         try:
-            await ctx.datahub.call(tool, args)
+            await ctx.datahub.call(m.tool, m.args)
             return "mcp"
         except Exception as exc:
-            log.warning("MCP %s failed, falling back to GraphQL: %s", tool, exc)
-            await asyncio.to_thread(graphql_fallback.run_fallback, tool, args)
-            return "graphql-fallback"
-    await asyncio.to_thread(graphql_fallback.run_fallback, tool, args)
-    return "graphql"
+            log.warning("MCP %s failed, falling back to GraphQL: %s", m.tool, exc)
+            via = "graphql-fallback"
+    await asyncio.to_thread(graphql_fallback.run_fallback, m.tool, m.args, m.urn)
+    return via
 
 
 async def run(ctx: Ctx) -> AsyncIterator[TimelineEvent]:
@@ -33,9 +33,12 @@ async def run(ctx: Ctx) -> AsyncIterator[TimelineEvent]:
             if m.tool == "add_tags":
                 for tag in m.args.get("tag_urns", []):
                     if tag not in ensured_tags:
-                        await asyncio.to_thread(graphql_fallback.ensure_tag, tag)
+                        try:
+                            await asyncio.to_thread(graphql_fallback.ensure_tag, tag)
+                        except Exception as exc:
+                            log.warning("ensure_tag(%s) failed, continuing: %s", tag, exc)
                         ensured_tags.add(tag)
-            record.via = await _execute(ctx, m.tool, m.args)
+            record.via = await _execute(ctx, m)
             yield TimelineEvent(
                 phase="commit",
                 kind="info",

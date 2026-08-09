@@ -2,7 +2,7 @@ import pytest
 from pydantic import BaseModel
 
 from hindsight.agent.phase_agent import PhaseFailed, run_phase_agent
-from hindsight.llm.base import ToolUse, Turn
+from hindsight.llm.base import Message, ToolResult, ToolUse, Turn, merge_user_turns
 from tests.conftest import FakeDataHub
 
 
@@ -96,3 +96,18 @@ async def test_missing_tools_warns_and_falls_back(fake_llm):
     events, result = await _drain(_agent(datahub))
     assert result.answer == "ok"
     assert any(e.kind == "warning" for e in events)
+
+
+def test_merge_user_turns_collapses_consecutive_user_messages():
+    merged = merge_user_turns(
+        [
+            Message(role="user", text="prompt"),
+            Message(role="assistant", text="thinking"),
+            Message(role="user", tool_results=[ToolResult(id="1", content="hits")]),
+            Message(role="user", text="last chance"),
+        ]
+    )
+
+    assert [m.role for m in merged] == ["user", "assistant", "user"]
+    assert merged[-1].text == "last chance"
+    assert [r.id for r in merged[-1].tool_results] == ["1"]

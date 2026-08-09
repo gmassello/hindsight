@@ -47,6 +47,14 @@ def _print_event(event: TimelineEvent) -> None:
     console.print(f"{indent}{icon} {label}{event.message}", style=style, highlight=False)
 
 
+def _require(directory: Path, name: str) -> Path:
+    file = directory / name
+    if not file.exists():
+        console.print(f"No {name} in {directory}", style="red")
+        raise typer.Exit(1)
+    return file
+
+
 def _write_report(state: InvestigationState, events: list[TimelineEvent], path: Path) -> None:
     path.mkdir(parents=True, exist_ok=True)
     (path / "input.txt").write_text(state.input_text + "\n")
@@ -140,15 +148,13 @@ def investigate(
 def replay(
     directory: Path = REPLAY_ARGUMENT,
 ) -> None:
-    events_file = directory / "events.json"
-    if not events_file.exists():
-        console.print(f"No events.json in {directory}", style="red")
-        raise typer.Exit(1)
+    events_file = _require(directory, "events.json")
+    state_file = _require(directory, "state.json")
 
     for raw in json.loads(events_file.read_text()):
         _print_event(TimelineEvent.model_validate(raw))
 
-    state = InvestigationState.model_validate_json((directory / "state.json").read_text())
+    state = InvestigationState.model_validate_json(state_file.read_text())
     console.print()
     console.print(
         Panel(render_plan(state.plan or ActionPlan()), title="Action plan", border_style="cyan")
@@ -162,12 +168,10 @@ def replay(
 def verify(
     directory: Path = VERIFY_ARGUMENT,
 ) -> None:
-    audit_file = directory / "audit-log.json"
-    if not audit_file.exists():
-        console.print(f"No audit-log.json in {directory}", style="red")
-        raise typer.Exit(1)
+    audit_file = _require(directory, "audit-log.json")
+    state_file = _require(directory, "state.json")
 
-    state = InvestigationState.model_validate_json((directory / "state.json").read_text())
+    state = InvestigationState.model_validate_json(state_file.read_text())
     checks: list[Check] = []
     for record in json.loads(audit_file.read_text()):
         checks.extend(check_record(record))

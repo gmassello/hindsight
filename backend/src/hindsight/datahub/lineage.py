@@ -44,27 +44,29 @@ def impact_score(
 
 
 def build_blast_radius(consumers: list[ConsumerReport]) -> BlastRadius:
-    impacted = []
+    by_urn: dict[str, ImpactedAsset] = {}
     for c in consumers:
+        seen = by_urn.get(c.urn)
+        if seen is not None and c.hops >= seen.hops:
+            continue
         owners = [o for o in c.owners if o]
-        impacted.append(
-            ImpactedAsset(
+        by_urn[c.urn] = ImpactedAsset(
+            urn=c.urn,
+            name=c.name,
+            type=c.type,
+            hops=c.hops,
+            owners=owners,
+            score=impact_score(
+                asset_type=c.type,
                 urn=c.urn,
-                name=c.name,
-                type=c.type,
                 hops=c.hops,
-                owners=owners,
-                score=impact_score(
-                    asset_type=c.type,
-                    urn=c.urn,
-                    hops=c.hops,
-                    has_owner=bool(owners),
-                    is_critical=c.is_critical,
-                    in_domain=c.in_domain,
-                ),
-            )
+                has_owner=bool(owners),
+                is_critical=c.is_critical,
+                in_domain=c.in_domain,
+            ),
         )
-    impacted.sort(key=lambda a: a.score, reverse=True)
+
+    impacted = sorted(by_urn.values(), key=lambda a: a.score, reverse=True)
     owners_to_notify = sorted({o for a in impacted for o in a.owners})
     return BlastRadius(
         impacted=impacted,

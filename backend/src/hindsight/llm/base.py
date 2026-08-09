@@ -39,6 +39,22 @@ class Message:
     tool_results: list[ToolResult] = field(default_factory=list)
 
 
+def merge_user_turns(messages: list[Message]) -> list[Message]:
+    merged: list[Message] = []
+    for message in messages:
+        previous = merged[-1] if merged else None
+        if previous is not None and previous.role == message.role == "user":
+            merged[-1] = Message(
+                role="user",
+                text="\n\n".join(t for t in (previous.text, message.text) if t) or None,
+                tool_uses=[*previous.tool_uses, *message.tool_uses],
+                tool_results=[*previous.tool_results, *message.tool_results],
+            )
+        else:
+            merged.append(message)
+    return merged
+
+
 @dataclass
 class Turn:
     text: str = ""

@@ -35,7 +35,16 @@ _FACETS = (
     " ownership { owners { owner { ... on CorpUser { urn } ... on CorpGroup { urn } } } }"
     " domain { domain { urn } }"
 )
-FACET_TYPES = ("Dataset", "Dashboard", "Chart", "DataJob")
+FACET_TYPES = (
+    "Dataset",
+    "Dashboard",
+    "Chart",
+    "DataJob",
+    "DataFlow",
+    "MLModel",
+    "MLFeatureTable",
+    "MLFeature",
+)
 
 _FRAGMENTS = " ".join(f"... on {t} {{ {_FACETS} }}" for t in FACET_TYPES)
 FACETS_QUERY = f"query($urn: String!) {{ entity(urn: $urn) {{ {_FRAGMENTS} }} }}"
@@ -44,6 +53,8 @@ FACETS_QUERY = f"query($urn: String!) {{ entity(urn: $urn) {{ {_FRAGMENTS} }} }}
 def entity_facets(urn: str) -> dict[str, Any]:
     data = _execute(FACETS_QUERY, {"urn": urn}) or {}
     entity = data.get("entity") or {}
+    if not entity:
+        raise GraphQLError(f"no readable facets for {urn}: unknown entity type or missing entity")
     editable = (entity.get("editableProperties") or {}).get("description")
     original = (entity.get("properties") or {}).get("description")
     return {
@@ -125,8 +136,11 @@ def set_domain(urn: str, domain: str) -> None:
     )
 
 
-def run_fallback(tool: str, args: dict[str, Any]) -> None:
-    for urn in mutation_targets(args):
+def run_fallback(tool: str, args: dict[str, Any], default_urn: str = "") -> None:
+    targets = mutation_targets(args, default_urn)
+    if not targets:
+        raise GraphQLError(f"No target URN for {tool}: {args}")
+    for urn in targets:
         if tool == "add_tags":
             add_tags(urn, args.get("tag_urns", []))
         elif tool == "update_description":

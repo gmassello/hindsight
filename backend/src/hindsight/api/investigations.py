@@ -10,6 +10,7 @@ from hindsight.models import InvestigationState, TimelineEvent
 router = APIRouter(prefix="/investigations")
 
 _store: dict[str, InvestigationState] = {}
+_started: set[str] = set()
 
 
 class CreateRequest(BaseModel):
@@ -43,11 +44,12 @@ def get(investigation_id: str) -> InvestigationState:
 @router.get("/{investigation_id}/stream")
 async def stream(investigation_id: str) -> EventSourceResponse:
     state = _get(investigation_id)
-    if state.status != "investigating" or state.incident is not None:
+    if state.status != "investigating" or investigation_id in _started:
         raise HTTPException(
             status_code=409,
             detail=f"Investigation already started (status: {state.status})",
         )
+    _started.add(investigation_id)
 
     async def generator():
         try:
@@ -73,6 +75,7 @@ async def approve(investigation_id: str) -> CommitResponse:
     state = _get(investigation_id)
     if state.status != "awaiting_approval":
         raise HTTPException(status_code=409, detail=f"Investigation is {state.status}")
+    state.status = "committing"
     events: list[TimelineEvent] = []
     async with DataHubMCP() as datahub:
         ctx = Ctx(state=state, datahub=datahub)
