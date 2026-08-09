@@ -212,7 +212,7 @@ Then hand it an incident the way you would hand one to a person:
 > triage this: {"asset": "analytics.order_history", "check": "freshness", "status": "fail"}
 ```
 
-[`examples/04-skill-portability`](examples/04-skill-portability) is that run: it names scenario 1's conclusion as its own second hypothesis, and documents the caveats and the three defects verification surfaced in the skill.
+[`examples/04-skill-portability`](examples/04-skill-portability) is exactly that, captured: scenario 1 handed to an agent following only `SKILL.md`, no Python in the loop. It names the backend run's conclusion as its own second hypothesis, and documents the caveats and the three defects verification surfaced in the skill.
 
 **What the skill cannot give you, and this repo does.** Instructions can describe the impact formula; they cannot execute it — the scores in that run were computed by hand from the skill's own reference. Everything that makes a claim checkable lives in the code: `verify` re-reading each mutation through GraphQL, `replay` reprinting a run from its raw event stream, the audit log, the approval gate enforced in code rather than requested in prose, and the GraphQL fallback when a mutation fails over MCP. The skill is the door; the repo is the guarantee.
 
