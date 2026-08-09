@@ -10,3 +10,4 @@ node_modules/
 dist/
 video/out/
 video/*.mov
+.DS_Store
