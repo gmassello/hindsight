@@ -39,14 +39,12 @@ The track rewards agents that **read** DataHub, **act**, and **write back**. All
 - [x] Hosted demo reachable by URL — **required by the rules**: https://gmassello.github.io/hindsight/ — static replay of the captured runs on GitHub Pages, published by `.github/workflows/pages.yml`. Overview page alongside it at `/landing/`
 - [x] CI on `main` and every PR: `.github/workflows/ci.yml` runs backend (`uv sync` + `ruff` + `pytest`) and frontend (`npm ci` + `npm run build` + `oxlint`) as parallel jobs
 
-### Pending
-
 - [x] Video, **public**, 2:33: https://youtu.be/y04gl1faens — shot list and narration written before recording, in [`video/`](video); synthetic voice-over with burned-in subtitles plus an `.srt` track
   - [x] Opens with the real on-call pain (first 20 seconds → applicability criterion)
   - [x] Shows scenario 2 (cold vs. warm) right before the closing moment
   - [x] Ends on the DataHub UI showing what the agent wrote — beat 6, after the warm run
-- [ ] **Submission loaded on Devpost** — including the Skill PR link
-- [ ] Feedback survey (US$50)
+- [x] **Submission loaded on Devpost**: https://devpost.com/software/hindsight-cpxymj — track *Agents That Do Real Work*, with the demo URL, the repo, the Skill PR and the six-image gallery
+- [x] Feedback survey (US$50) — answered as part of the submission form
 
 ## Rubric mapping
 
@@ -82,5 +80,5 @@ Scenarios 1–3 are defined in `scenarios/scenarios.yaml` and reproducible from 
 - [x] Skill PR opened — [datahub-project/datahub-skills#110](https://github.com/datahub-project/datahub-skills/pull/110)
 - [x] Hosted demo live and reachable — https://gmassello.github.io/hindsight/
 - [x] Video recorded, edited, uploaded as **public** — https://youtu.be/y04gl1faens
-- [ ] Devpost submission loaded — not "almost ready"
-- [ ] Monday buffer: fresh-eyes review, finish before noon (deadline 18:00 ART)
+- [x] Devpost submission loaded — https://devpost.com/software/hindsight-cpxymj, submitted with 23 hours to spare
+- [x] Fresh-eyes review: every external link in this file and in the README opened and checked (14/14 reachable)
