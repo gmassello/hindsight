@@ -57,7 +57,7 @@ All six criteria weigh equally; each needs an explicit answer.
 | Originality | The memory loop: the system improves with use and the knowledge lives in DataHub | Scenario 2 in the video |
 | Real-world applicability | Data on-call: concrete, expensive pain, backed by first-hand experience | First 20 seconds of the video |
 | Delivery quality | `docker compose up` + README + `examples/` + hosted demo + CI on main and every PR + a 2:33 video | Everything |
-| **Open source bonus** | `datahub-incident-triage` Skill proposed upstream | [datahub-skills#110](https://github.com/datahub-project/datahub-skills/pull/110) |
+| **Open source bonus** | `datahub-incident-triage` Skill proposed upstream, and installable in one command (`npx skills add gmassello/hindsight`) into eleven detected agents — `examples/04-skill-portability` proves it reproduces the backend's result | [datahub-skills#110](https://github.com/datahub-project/datahub-skills/pull/110) |
 
 ## Demo scenarios
 

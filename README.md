@@ -11,6 +11,7 @@
 <p align="center">
   <a href="https://gmassello.github.io/hindsight/"><b>Live demo</b></a> ·
   <a href="https://youtu.be/y04gl1faens"><b>Video (2:33)</b></a> ·
+  <a href="#the-workflow-as-a-portable-skill"><b>Install the Skill</b></a> ·
   <a href="https://github.com/datahub-project/datahub-skills/pull/110"><b>Skill PR</b></a> ·
   <a href="examples/"><b>Captured runs</b></a> ·
   <a href="SUBMISSION.md"><b>Submission</b></a>
@@ -30,7 +31,8 @@
 **Data on-call, not ML drift.** The alert is free text, the root cause is ranked and grounded in incidents you already solved, and the postmortem is filed *inside DataHub* — where the next investigation finds it. Built for the [Build with DataHub: The Agent Hackathon](https://datahub.devpost.com/), track *Agents That Do Real Work*.
 
 ```bash
-cd backend && .venv/bin/hindsight replay ../examples/02-cold-vs-warm/warm    # ten seconds, no DataHub, no API key
+cd backend && .venv/bin/hindsight replay ../examples/02-cold-vs-warm/warm   # ten seconds, no DataHub, no API key
+npx skills add gmassello/hindsight                                         # or run the same procedure in your own CLI, nothing cloned
 ```
 
 <table>
@@ -41,7 +43,7 @@ cd backend && .venv/bin/hindsight replay ../examples/02-cold-vs-warm/warm    # t
 </tr>
 </table>
 
-And none of it depends on this codebase. The same procedure runs as a portable [Agent Skill](.agents/skills/datahub-incident-triage), no Python in the loop, and reaches **the same fourteen owners, set for set** — [the run](examples/04-skill-portability), [proposed upstream](https://github.com/datahub-project/datahub-skills/pull/110).
+**And none of it is locked in this codebase.** One command installs the same procedure as a portable [Agent Skill](.agents/skills/datahub-incident-triage) into whatever CLI you already use — Claude Code, Cursor, Codex, Gemini CLI, Copilot and six more, no Python in the loop. Handed the same incident it reaches **the same fourteen owners, set for set** ([the run](examples/04-skill-portability)), and it is [proposed upstream](https://github.com/datahub-project/datahub-skills/pull/110) to the official DataHub skills repo.
 
 ### An agent that reports its own success proves nothing
 
@@ -65,7 +67,7 @@ That is the rule the product is built on: nothing counts until a second channel 
 | --- | --- |
 | **See the memory loop pay off** | [`examples/02-cold-vs-warm`](examples/02-cold-vs-warm) — the second run retrieves the first one's postmortem out of the catalog: 20 tool calls cold vs. 15 warm |
 | **See it do real work** | [`examples/01-schema-drift`](examples/01-schema-drift) — 14 tool calls, 16 consumers, 10 owners paged, postmortem filed, `verified 5/5` |
-| **See it work without our code** | [`examples/04-skill-portability`](examples/04-skill-portability) — the same procedure as a portable Agent Skill, [proposed upstream](https://github.com/datahub-project/datahub-skills/pull/110) |
+| **See it work without our code** | `npx skills add gmassello/hindsight` — the same procedure as a portable Agent Skill, [proposed upstream](https://github.com/datahub-project/datahub-skills/pull/110); [`examples/04-skill-portability`](examples/04-skill-portability) is the run that proves it |
 
 ---
 
@@ -187,6 +189,35 @@ It also buys speed, and that part is not free. The warm run was cheaper **and na
 
 ---
 
+## The workflow as a portable Skill
+
+[`.agents/skills/datahub-incident-triage/`](.agents/skills/datahub-incident-triage) distills the agent into an [Agent Skills](https://skills.sh) package: the same seven-step procedure as plain instructions, no Python. One command puts it in whatever CLI you already have.
+
+```bash
+npx skills add gmassello/hindsight
+```
+
+That detects the agents installed on the machine and writes the skill for each — on this one it covered eleven, Claude Code, Cursor, Codex, Gemini CLI, GitHub Copilot, Warp and OpenCode among them. To place it by hand instead:
+
+| Agent | Path |
+| --- | --- |
+| Claude Code | `.claude/skills/` |
+| Cursor, GitHub Copilot, Codex, Gemini CLI | `.agents/skills/` |
+| Windsurf | `.windsurf/skills/` |
+
+Then hand it an incident the way you would hand one to a person:
+
+```
+> orders in order_entry_db is showing NULL values in customer_id since 03:00 UTC
+> triage this: {"asset": "analytics.order_history", "check": "freshness", "status": "fail"}
+```
+
+[`examples/04-skill-portability`](examples/04-skill-portability) is that run: it names scenario 1's conclusion as its own second hypothesis, and documents the caveats and the three defects verification surfaced in the skill.
+
+**What the skill cannot give you, and this repo does.** Instructions can describe the impact formula; they cannot execute it — the scores in that run were computed by hand from the skill's own reference. Everything that makes a claim checkable lives in the code: `verify` re-reading each mutation through GraphQL, `replay` reprinting a run from its raw event stream, the audit log, the approval gate enforced in code rather than requested in prose, and the GraphQL fallback when a mutation fails over MCP. The skill is the door; the repo is the guarantee.
+
+---
+
 ## Every claim, and where to check it
 
 Every number above comes from a file in this repository.
@@ -223,14 +254,6 @@ Every number above comes from a file in this repository.
 `scenarios/seed_incidents.py` loads six resolved historical postmortems so `recall` has memory to work with.
 
 </details>
-
----
-
-## The workflow as a portable Skill
-
-[`.agents/skills/datahub-incident-triage/`](.agents/skills/datahub-incident-triage) distills the agent into an [Agent Skills](https://skills.sh) package: the same seven-step procedure as plain instructions, no Python. Any Agent-Skills CLI with DataHub connected gets the behaviour without cloning this repo.
-
-[`examples/04-skill-portability`](examples/04-skill-portability) is that run: it names scenario 1's conclusion as its own second hypothesis, and documents the caveats and the three defects verification surfaced in the skill.
 
 ---
 
