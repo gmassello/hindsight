@@ -22,8 +22,8 @@ and `build-video.sh` prefers `/opt/homebrew/opt/ffmpeg@7/bin` automatically. The
 ./build-audio.sh                                   # out/narration.wav, captions.srt, timing.txt
 ./make-slides.sh                                   # out/slide.png, out/slide-close.png
 # record the screen → video/raw.mov (Cmd+Shift+5, window mode, mic off)
-awk 'NR==1 || $1 != "1"' out/timing.txt > out/timing-noslide.txt
-./fit-to-audio.py raw.mov --beats <marks> --timing out/timing-noslide.txt
+awk 'NR==1 || ($1 != "1" && $1 != "7")' out/timing.txt > out/timing-fit.txt
+./fit-to-audio.py raw.mov --beats <5 marks> --timing out/timing-fit.txt
 SLIDE=out/slide.png SLIDE_DUR=$B1 OUTRO="out/slide-close.png:$B7" OUTRO_REPLACE=$B7 \
   ./build-video.sh out/raw-fitted.mov
 ```
@@ -32,8 +32,14 @@ SLIDE=out/slide.png SLIDE_DUR=$B1 OUTRO="out/slide-close.png:$B7" OUTRO_REPLACE=
   captions under ~10 words.
 - `$B1` and `$B7` are the lengths of beats 1 and 7 in `out/timing.txt` — read them there rather than
   writing them down anywhere, they move with every narration edit.
-- Beat 1 is covered by the slide, so the fit runs against a timing file without that row and its
-  marks start at beat 2 — that is what the `awk` line produces.
+- Beats 1 and 7 are slides, not footage, so the fit runs against a timing file without those two
+  rows and takes one mark per remaining beat — five, starting at beat 2. That is what the `awk`
+  line produces; `fit-to-audio.py` aborts if the count does not match.
+- Find the marks by contact-sheeting the recording (`fps=1/12` tiled, with the timestamp drawn on
+  each frame) and then probing single frames around each candidate boundary. The marks that shipped
+  were `0,35,104,180,264` for a 356 s take.
+- `fit-to-audio.py` reports `off by -Xs` against the full narration: that is expected, X is beat 1
+  plus beat 7, the two the slides cover.
 - `build-audio.sh` re-renders every clip, so a narration edit also invalidates `out/raw-fitted.mov`.
   The slides survive it.
 - `fit-to-audio.py` finds the moments where the screen changes, keeps them at 1x with a readable
@@ -58,3 +64,5 @@ for beat 6.
 Under 3:00, readable muted on a phone, the Pages URL visible in the address bar. Upload **public** to
 YouTube with the `.srt` attached, then paste the link into `README.md` and `SUBMISSION.md` — not
 before, so no link in the repo ever points at something that does not exist yet.
+
+What shipped: https://youtu.be/y04gl1faens — 2:33, marks `0,45,112,188,295` on a 358 s take.

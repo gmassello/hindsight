@@ -41,11 +41,10 @@ The track rewards agents that **read** DataHub, **act**, and **write back**. All
 
 ### Pending
 
-- [ ] Video: 3 minutes, **public** — shot list and narration written before recording, in [`video/`](video); the build pipeline reports the measured length per beat
+- [x] Video, **public**, 2:33: https://youtu.be/y04gl1faens — shot list and narration written before recording, in [`video/`](video); synthetic voice-over with burned-in subtitles plus an `.srt` track
   - [x] Opens with the real on-call pain (first 20 seconds → applicability criterion)
   - [x] Shows scenario 2 (cold vs. warm) right before the closing moment
   - [x] Ends on the DataHub UI showing what the agent wrote — beat 6, after the warm run
-  - [ ] Recorded, assembled, uploaded as public
 - [ ] **Submission loaded on Devpost** — including the Skill PR link
 - [ ] Feedback survey (US$50)
 
@@ -59,7 +58,7 @@ All six criteria weigh equally; each needs an explicit answer.
 | Technical quality | Deterministic phase pipeline, per-phase toolset, dry-run, tests, GraphQL fallback | README "How it works" + `backend/tests/` |
 | Originality | The memory loop: the system improves with use and the knowledge lives in DataHub | Scenario 2 in the video |
 | Real-world applicability | Data on-call: concrete, expensive pain, backed by first-hand experience | First 20 seconds of the video |
-| Delivery quality | `docker compose up` + README + `examples/` + hosted demo + CI on main and every PR; video pending | Everything |
+| Delivery quality | `docker compose up` + README + `examples/` + hosted demo + CI on main and every PR + a 2:33 video | Everything |
 | **Open source bonus** | `datahub-incident-triage` Skill proposed upstream | [datahub-skills#110](https://github.com/datahub-project/datahub-skills/pull/110) |
 
 ## Demo scenarios
@@ -82,6 +81,6 @@ Scenarios 1–3 are defined in `scenarios/scenarios.yaml` and reproducible from 
 - [x] README with architecture diagram and justified decisions
 - [x] Skill PR opened — [datahub-project/datahub-skills#110](https://github.com/datahub-project/datahub-skills/pull/110)
 - [x] Hosted demo live and reachable — https://gmassello.github.io/hindsight/
-- [ ] Video recorded, edited, uploaded as **public**
+- [x] Video recorded, edited, uploaded as **public** — https://youtu.be/y04gl1faens
 - [ ] Devpost submission loaded — not "almost ready"
 - [ ] Monday buffer: fresh-eyes review, finish before noon (deadline 18:00 ART)

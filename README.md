@@ -16,7 +16,7 @@
 
 It takes a free-text alert, walks the DataHub lineage graph to rank who is affected, proposes a root cause backed by incidents you already solved, and files the postmortem *inside DataHub*. Built for the [Build with DataHub: The Agent Hackathon](https://datahub.devpost.com/), track *Agents That Do Real Work*.
 
-**[▶ Watch it run in your browser](https://gmassello.github.io/hindsight/)** — a recorded investigation replaying in the real UI: evidence timeline, ranked blast radius, the approval gate. No install, no API key.
+**[▶ Watch it run in your browser](https://gmassello.github.io/hindsight/)** — a recorded investigation replaying in the real UI: evidence timeline, ranked blast radius, the approval gate. No install, no API key. Or watch the [2:33 demo video](https://youtu.be/y04gl1faens), which ends on the DataHub UI showing what the agent wrote.
 
 <table>
 <tr>
