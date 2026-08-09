@@ -53,6 +53,7 @@ frontend/src/
 frontend/public/landing/    # the overview page, copied verbatim into dist/ by Vite
 scenarios/                  # seed_incidents.py, break_schema.py, scenarios.yaml
 examples/                   # five captured runs; 04 is not in scenarios.yaml
+video/                      # demo-video pipeline: shot list, narration, build scripts
 .agents/skills/             # datahub-incident-triage: this workflow as a portable Agent Skill
 .claude/skills →            # symlink to .agents/skills/, so Claude Code discovers them
 AGENTS.md                   # agent instructions for this repo; CLAUDE.md just imports it
