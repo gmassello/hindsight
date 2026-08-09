@@ -9,8 +9,8 @@
 </p>
 
 <p align="center">
+  <a href="https://youtu.be/y04gl1faens"><b>Video</b></a> ·
   <a href="https://gmassello.github.io/hindsight/"><b>Live demo</b></a> ·
-  <a href="https://youtu.be/y04gl1faens"><b>Video (2:33)</b></a> ·
   <a href="#the-workflow-as-a-portable-skill"><b>Install the Skill</b></a> ·
   <a href="https://github.com/datahub-project/datahub-skills/pull/110"><b>Skill PR</b></a> ·
   <a href="examples/"><b>Captured runs</b></a> ·
